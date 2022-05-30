@@ -43,11 +43,21 @@ TODO: show the environment runner script
 
 You can use this interface and these following extensions to run optimizations using these following methods:
 
-* Turbo: Extension (TODO: link to our library that provide NNI link)
-* [BoTorch](https://github.com/pytorch/botorch/): Extension (TODO: link to our library that provide NNI link)
-* DeepGP: Extension (TODO: link to our library that provide NNI link)
-* [NNI suite](https://github.com/microsoft/nni): Extension (TODO: link to our library that provide NNI link)
+### Single-Objective Optimization
+For optimizing a single objective (e.g. latency only, throughput only, etc...) 
 
+* [BoTorch](https://github.com/pytorch/botorch/), [Turbo](https://proceedings.neurips.cc/paper/2019/file/6c990b7aca7bc7058f5e98ea909e924b-Paper.pdf), [DeepGP-BO](http://proceedings.mlr.press/v31/damianou13a.pdf):  Use the SysmGym-BoTorch [BoTorch-sysgym](https://github.com/samialabed/sysgym-botorch)
+* DeepGP: Extension (TODO: link to our library that provide NNI link)
+* [NNI suite](https://github.com/microsoft/nni): Use the SysmGym-NNI [Extension](https://github.com/samialabed/sysgym-nni)
+
+
+
+### Multi-Objective Optimization
+
+
+You can optimize multiple objectives using only the following: 
+* [BoGraph](https://github.com/samialabed/bograph) (supports sysgym out othe box) 
+* [BoTorch-sysgym](https://github.com/samialabed/sysgym-botorch)
 
 ## Setup 
 
