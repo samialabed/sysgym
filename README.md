@@ -18,7 +18,6 @@ A suite of real-world systems and interface to compare iterative optimization al
 - [ ] Apache Flink
 
 
-
 Feel free to contribute your own environment, please check `CONTRIBUTION` as well as (TODO: Provide link to documenting how to add new environment)
 
 
@@ -46,10 +45,9 @@ You can use this interface and these following extensions to run optimizations u
 ### Single-Objective Optimization
 For optimizing a single objective (e.g. latency only, throughput only, etc...) 
 
-* [BoTorch](https://github.com/pytorch/botorch/), [Turbo](https://proceedings.neurips.cc/paper/2019/file/6c990b7aca7bc7058f5e98ea909e924b-Paper.pdf), [DeepGP-BO](http://proceedings.mlr.press/v31/damianou13a.pdf):  Use the SysmGym-BoTorch [BoTorch-sysgym](https://github.com/samialabed/sysgym-botorch)
-* DeepGP: Extension (TODO: link to our library that provide NNI link)
-* [NNI suite](https://github.com/microsoft/nni): Use the SysmGym-NNI [Extension](https://github.com/samialabed/sysgym-nni)
-
+* [BoTorch](https://github.com/pytorch/botorch/), [Turbo](https://proceedings.neurips.cc/paper/2019/file/6c990b7aca7bc7058f5e98ea909e924b-Paper.pdf), or [DeepGP-BO](http://proceedings.mlr.press/v31/damianou13a.pdf):  Use the [SysmGym-BoTorch](https://github.com/samialabed/sysgym-botorch) extension.
+* [NNI suite](https://github.com/microsoft/nni): Use the [SysmGym-NNI](https://github.com/samialabed/sysgym-nni) extension.
+ 
 
 
 ### Multi-Objective Optimization
