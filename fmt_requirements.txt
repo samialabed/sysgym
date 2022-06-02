@@ -1,0 +1,4 @@
+# Formating and type checks
+pyre-check
+black
+flake8

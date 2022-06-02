@@ -18,8 +18,7 @@ A suite of real-world systems and interface to compare iterative optimization al
 - [ ] Apache Flink
 
 
-Feel free to contribute your own environment, please check `CONTRIBUTION` as well as (TODO: Provide link to documenting how to add new environment)
-
+Feel free to contribute your own environment, please check `CONTRIBUTION` as well as [Instruction on adding new environment](sysgym/envs/instruction.md).
 
 
 ## Quick start
@@ -28,13 +27,13 @@ Feel free to contribute your own environment, please check `CONTRIBUTION` as wel
 
 ```Python
 
-TODO: API demo showing a single iterative loop 
+#TODO: API demo showing a single iterative loop 
 
 ```
 
 ### Run several benchmark against a specific environment 
 ```Python
-TODO: show the environment runner script
+#TODO: show the environment runner script
 ```
 
 
@@ -60,6 +59,12 @@ You can optimize multiple objectives using only the following:
 ## Setup 
 
 Each environment has its own setup requirement, you can either install environment using script `install_all.sh` or a specific environment as found in the scripts directory.
+
+
+## Towards V1 release
+As we are still in v0.1 expect the API to change overtime as we simplify the process of using it, the primary goal of V1 release are:
+- [ ]Simplify the process of importing the desirable API: which means creating hooks to perform the installation at import time rather than requiring the user to manually run scripts.
+- [ ] improving the space abstraction to allow incorporating hierarchical dependencies between the parameters. 
 
 ## Citation
 
