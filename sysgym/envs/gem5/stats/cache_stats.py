@@ -2,9 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class CacheStats(object):
-    # TODO: we only consider tlb and dcache for now, when we add support for others we can incorporate them here
-
+class CacheStats:
     # Average dcache dynamic and leakage power.
     system_datapath_dcache_average_pwr: float
     system_datapath_dcache_dynamic_pwr: float  # Average dcache dynamic power.

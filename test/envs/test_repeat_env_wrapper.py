@@ -3,7 +3,10 @@ from typing import Callable, Dict, NamedTuple
 
 from parameterized import parameterized
 
-from sysgym.envs.repeat_env_wrapper import map_nested_dicts_modify, moving_avg_func
+from sysgym.decorators.repeat_env_wrapper import (
+    map_nested_dicts_modify,
+    moving_avg_func,
+)
 
 
 class MovingAverageTestInput(NamedTuple):

@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 from time import sleep
 from typing import Optional
 
@@ -9,17 +10,17 @@ from docker.models.containers import Container
 from docker.types import Mount
 from timeout_decorator import timeout
 
-from sysgym.dir_struct import PackageRootDir
+from sysgym.envs.gem5.benchmarks.benchmark_eval_planner import (
+    generate_benchmark_eval_template,
+)
 from sysgym.envs.gem5.benchmarks.benchmark_settings import Gem5BenchmarkConfig
-from sysgym.envs.gem5.benchmarks.benchmark_tasks import TASK_TO_TIMEOUT_SECONDS
-from sysgym.envs.gem5.params_dict import Gem5ParamsDict
-
-
-class DockerExecutionException(BaseException):
-    pass
-
+from sysgym.envs.gem5.benchmarks.benchmark_tasks_timeout import TASK_TO_TIMEOUT_SECONDS
+from sysgym.envs.gem5.benchmarks.exception import DockerExecutionException
 
 # Constant container settings
+from sysgym.envs.gem5.env_measure import Gem5Metrics
+from sysgym.envs.gem5.parsers import parse_statistics, parse_summary_file
+from sysgym.params.param_dict import EnvParamsDict
 
 WORKSPACE_ROOT_DIR = "/workspace"
 PATH_TO_GEM_WORKSPACE = "/workspace/gem5-aladdin"
@@ -35,15 +36,16 @@ class Gem5ContainerSettings:
 
 class Gem5BenchmarkDocker:
     def __init__(
-        self, bench_cfg: Gem5BenchmarkConfig, container_settings: Gem5ContainerSettings
+        self,
+        bench_cfg: Gem5BenchmarkConfig,
+        container_settings: Gem5ContainerSettings,
+        output_dir: Path,
     ):
-        self.ctx = ExperimentManager()
         self._container_settings = container_settings
         self._bench_cfg = bench_cfg
-
+        self._output_dir = output_dir
         task_name = str(bench_cfg.task)
-        # TODO: Files to capture is bit hacky, basically it is the name of files
-        # to copy from the docker volume
+        # name of files to copy from the docker volume that contains benchmark info
         self.files_to_capture = [
             "stderr",
             "stdout",
@@ -53,19 +55,21 @@ class Gem5BenchmarkDocker:
             f"{task_name}_summary",
         ]
         self._docker_cli = docker.from_env()
-
-        task_timeout_secs = TASK_TO_TIMEOUT_SECONDS.get(self._bench_cfg.task, None)
-        if task_timeout_secs is None:
-            LOG.warning(
-                "No specific timeout provided for task %s. Defaulting to 15 minutes.",
-                self._bench_cfg.task,
-            )
-            # Default to 15 minute timeout if no task specific timeout provided
-            task_timeout_secs = 15 * 60
-        timeout_wrapper = timeout(seconds=task_timeout_secs)
-        self._exec_benchmark_w_timeout = timeout_wrapper(self._exec_benchmark)
+        if self._bench_cfg.timeout_override:
+            task_timeout_secs = self._bench_cfg.timeout_override
+        else:
+            task_timeout_secs = TASK_TO_TIMEOUT_SECONDS.get(self._bench_cfg.task, None)
+            if task_timeout_secs is None:
+                LOG.warning(
+                    "No specific timeout provided for task %s. Defaulting to 15 mins.",
+                    self._bench_cfg.task,
+                )
+                # Default to 15 minute timeout if no task specific timeout provided
+                task_timeout_secs = 15 * 60
+        self._exec_benchmark = timeout(seconds=task_timeout_secs)(self._exec_benchmark)
 
         self._gem5_container: Optional[Container] = None
+        self._compiled_sim_path = f"{WORKSPACE_ROOT_DIR}/compiled_simulation/"
 
     def initialize(self):
         self._gem5_container = self._get_gem5_container(
@@ -75,26 +79,23 @@ class Gem5BenchmarkDocker:
 
     def cleanup(self, container: Container):
         LOG.debug("Cleaning up container %s.", container.name)
+        container.exec_run(
+            workdir=WORKSPACE_ROOT_DIR, cmd=f"rm -r {self._compiled_sim_path}"
+        )
         container.kill()
-        sleep(10)  # wait for the container to die
-        # TODO: add code to clean up the container benchmark file
-        # TODO: if flag set to clean the system trace also remove the "files to capture"
+        sleep(10)  # wait for the container to properly close
 
-    def execute(self, params: Gem5ParamsDict) -> None:
+    def execute(self, params: EnvParamsDict) -> Gem5Metrics:
         """Execute the benchmark_container in docker given set parameters"""
         assert (
             self._gem5_container
         ), "Expected the container to be initialized before executing the benchmark"
 
         try:
-            # build the task directory structure:
-            # /env_name/benchmark_name/num_params/exp_name(model)/exp_time/iterations
-            exp_dir = self.ctx.experiment_relative_path / str(self.ctx.cur_iter)
-            full_path_to_exp_dir = f"{WORKSPACE_ROOT_DIR}/{exp_dir}"
-
+            # build the task directory structure
             status = self._gem5_container.exec_run(
                 workdir=WORKSPACE_ROOT_DIR,
-                cmd=f"mkdir -p {full_path_to_exp_dir}",
+                cmd=f"mkdir -p {self._compiled_sim_path}",
             )
             if status.exit_code != 0:
                 raise DockerExecutionException(
@@ -102,15 +103,17 @@ class Gem5BenchmarkDocker:
                 )
 
             # Create the benchmark_container execution template for gem5
-            benchmark_eval_plan = self._bench_cfg.generate_benchmark_eval_template(
-                output_dir=full_path_to_exp_dir, evaluation_configs=params
+            benchmark_eval_plan = generate_benchmark_eval_template(
+                bench_cfg=self._bench_cfg,
+                output_dir=self._compiled_sim_path,
+                evaluation_configs=params,
             )
 
             # Copy the plan into docker
             benchmark_eval_filename = f"{str(self._bench_cfg.task)}_eval.xe"
 
             status = self._gem5_container.exec_run(
-                workdir=full_path_to_exp_dir,
+                workdir=self._compiled_sim_path,
                 cmd=[
                     "bash",
                     "-c",
@@ -129,7 +132,7 @@ class Gem5BenchmarkDocker:
                 workdir=f"{workspace_dir}/sweeps/benchmarks",
                 cmd=[
                     f"{workspace_dir}/sweeps/generate_design_sweeps.py",
-                    f"{full_path_to_exp_dir}/{benchmark_eval_filename}",
+                    f"{self._compiled_sim_path}/{benchmark_eval_filename}",
                 ],
             )
             if status.exit_code != 0:
@@ -139,16 +142,25 @@ class Gem5BenchmarkDocker:
 
             # run the benchmark_container
             benchmark_dir_in_container = (
-                f"{full_path_to_exp_dir}/{self._bench_cfg.task}/0"
+                f"{self._compiled_sim_path}/{self._bench_cfg.task}/0"
             )
 
-            self._exec_benchmark_w_timeout(
+            self._exec_benchmark(
                 benchmark_dir_in_container=benchmark_dir_in_container,
                 benchmark_eval_plan=benchmark_eval_plan,
             )
             self.grab_env_output(benchmark_dir_in_container=benchmark_dir_in_container)
+
+            summary_stats = parse_summary_file(
+                self._output_dir / f"{self._bench_cfg.task}_summary"
+            )
+            detailed_stats = parse_statistics(self._output_dir / "stats.txt")
+
+            return Gem5Metrics(
+                summary_stats=summary_stats, detailed_stats=detailed_stats
+            )
         except TimeoutError as te:
-            LOG.error("Executing the benchmark_container failed. %s", te)
+            LOG.error("Executing the benchmark failed. %s", te)
         except Exception as e:
             LOG.error("Docker execution failed: %s", e)
             raise e
@@ -167,9 +179,9 @@ class Gem5BenchmarkDocker:
                 workdir=benchmark_dir_in_container,
                 cmd=["bash", "-c", "cat outputs/stderr"],
             )
-            with open(self.ctx.env_output_dir / "stderr", "wb") as outf:
+            with open(self._output_dir / "stderr", "wb") as outf:
                 outf.write(file_content.output)
-            with open(self.ctx.env_output_dir / "execution_plan", "w") as outf:
+            with open(self._output_dir / "execution_plan", "w") as outf:
                 outf.writelines(benchmark_eval_plan)
             raise DockerExecutionException(
                 f"Docker exec failed with error: {status.output}"
@@ -188,7 +200,7 @@ class Gem5BenchmarkDocker:
                 )
 
             # download it into the experiment manager directory
-            with open(self.ctx.env_output_dir / file_name, "wb") as outf:
+            with open(self._output_dir / file_name, "wb") as outf:
                 outf.write(file_content.output)
 
     def _get_gem5_container(
@@ -199,7 +211,7 @@ class Gem5BenchmarkDocker:
 
         Args:
             reuse (bool): Specify whether to reuse an existing
-            running container or kill an existing container if it exist
+            running container or kill an existing container if it exists
 
         """
         try:
@@ -227,11 +239,9 @@ class Gem5BenchmarkDocker:
 
         # Check if we need to create the volume and compile all libraries
         if not self._is_volume_created():
-            install_script_loc = (
-                f"{PackageRootDir}/sysgym/scripts/gem5_dockersetup/aladdin_setup.sh"
-            )
+            install_script_loc = "/scripts/gem5_dockersetup/aladdin_setup.sh"
             raise SystemError(
-                "No gem5 docker volume detected. Run " f"file://{install_script_loc}"
+                f"No gem5 docker volume detected. Run {install_script_loc}"
             )
 
         # Create a container

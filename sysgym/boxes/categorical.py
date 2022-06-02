@@ -3,17 +3,14 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
-from sysgym.spaces.space_abc import ParameterSpace
+from sysgym.boxes.box import ParameterBox
 
 
-class CategoricalSpace(ParameterSpace[str]):
-    __slots__ = ["name", "categories", "__encoder"]
-
-    def __init__(self, name: str, categories: List[str], default: Optional[str] = None):
+class CategoricalBox(ParameterBox[str]):
+    def __init__(self, categories: List[str], default: Optional[str] = None):
         self.categories = categories
         num_cats = len(self.categories)
-        super(CategoricalSpace, self).__init__(
-            name,
+        super().__init__(
             lower_bound=0,
             upper_bound=num_cats,
             default=default,
@@ -26,7 +23,6 @@ class CategoricalSpace(ParameterSpace[str]):
 
     def dict_repr(self) -> Dict[str, Union[str, List[str]]]:
         return {
-            "name": self.name,
             "categories": self.categories,
         }
 

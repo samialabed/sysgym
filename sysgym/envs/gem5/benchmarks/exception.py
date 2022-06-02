@@ -1,0 +1,2 @@
+class DockerExecutionException(BaseException):
+    pass

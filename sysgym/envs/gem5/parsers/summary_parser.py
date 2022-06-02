@@ -1,12 +1,12 @@
 from pathlib import Path
 
 from sysgym.envs.gem5.parsers import ParserException
-from sysgym.envs.gem5.parsers.regex import summary_file_regex
-from sysgym.envs.gem5.stats import BenchmarkStats
+from sysgym.envs.gem5.parsers.regex import SUMMARY_PARSERS
+from sysgym.envs.gem5.stats import SummaryStats
 
 
-def parse_summary_file(summary_file_path: Path) -> BenchmarkStats:
-    """Parse a summary file contents and output a BenchmarkStats"""
+def parse_summary_file(summary_file_path: Path) -> SummaryStats:
+    """Parse a summary file contents and output a SummaryStats"""
     # Parses specifically _summary_stats.txt
 
     with open(summary_file_path) as f:
@@ -20,10 +20,10 @@ def parse_summary_file(summary_file_path: Path) -> BenchmarkStats:
 
         stats, val = line.split(":")
         stats = _clean_stats_name(stats)
-        if stats not in summary_file_regex:
+        if stats not in SUMMARY_PARSERS:
             # skip keys we don't have parsers for
             continue
-        stat_parser = summary_file_regex[stats]
+        stat_parser = SUMMARY_PARSERS[stats]
         val = val.strip()
         value_match = stat_parser.match(val)
         if not value_match:
@@ -33,7 +33,7 @@ def parse_summary_file(summary_file_path: Path) -> BenchmarkStats:
         value = value_match.group(1)
         parsed_results[stats] = float(value)
 
-    return BenchmarkStats(**parsed_results)
+    return SummaryStats(**parsed_results)
 
 
 def _clean_stats_name(stats: str) -> str:

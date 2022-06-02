@@ -1,18 +1,15 @@
-import re
 from pathlib import Path
 
-from sysgym.envs.gem5.parsers.regex import FLOAT_NUM_PARSER
-from sysgym.envs.gem5.stats.cache_stats import CacheStats
-
-parser = re.compile(rf"(\S+) ({FLOAT_NUM_PARSER})")
+from sysgym.envs.gem5.parsers.regex import CACHE_STATS_PARSER
+from sysgym.envs.gem5.stats import CacheStats
 
 
 def parse_cache_stats_file(cache_stats_fp: Path) -> CacheStats:
-    """Parse a summary file contents and output a BenchmarkStats."""
+    """Parse a summary file contents and output a SummaryStats."""
     # Parses specifically _cache_stats.txt
     with open(cache_stats_fp) as f:
         contents = f.read()
-    matched_res = parser.findall(contents)
+    matched_res = CACHE_STATS_PARSER.findall(contents)
     parsed_results = {k: float(v) for k, v in matched_res}
 
     return CacheStats(**parsed_results)

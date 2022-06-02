@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List, Set
 
 
-class ExtendedEnum(Enum):
+class ListableEnum(Enum):
     @classmethod
     def list(cls) -> List[str]:
         return list(map(lambda c: c.value, cls))
@@ -14,7 +14,7 @@ class ExtendedEnum(Enum):
         return str(self.value)
 
 
-class BenchmarkTask(ExtendedEnum):
+class BenchmarkTask(ListableEnum):
     @classmethod
     def set(cls) -> Set[str]:
         return set(map(lambda c: c.value, cls))

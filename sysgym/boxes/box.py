@@ -7,19 +7,14 @@ import numpy as np
 SUPPORTED_TYPES = TypeVar("SUPPORTED_TYPES", int, bool, float, str)  # container types
 
 
-class ParameterSpace(ABC, Generic[SUPPORTED_TYPES]):
-    # TODO: is name needed?
-    __slots__ = ["__name", "__lower_bound", "__upper_bound", "__default", "formula"]
-
+class ParameterBox(ABC, Generic[SUPPORTED_TYPES]):
     def __init__(
         self,
-        name: str,
         lower_bound: SUPPORTED_TYPES,
         upper_bound: SUPPORTED_TYPES,
         default: Optional[SUPPORTED_TYPES] = None,
         formula: Callable = lambda x: x,
     ):
-        self.__name = name
         self.__lower_bound = lower_bound
         self.__upper_bound = upper_bound
         self.__default = default
@@ -28,10 +23,6 @@ class ParameterSpace(ABC, Generic[SUPPORTED_TYPES]):
         assert (
             self.lower_bound < self.upper_bound
         ), f"Lower bound {self.lower_bound} >= upper bound: {self.upper_bound}"
-
-    @property
-    def name(self) -> str:
-        return self.__name
 
     @property
     def bounds(self) -> Tuple[int, int]:
@@ -53,17 +44,12 @@ class ParameterSpace(ABC, Generic[SUPPORTED_TYPES]):
     def upper_bound(self) -> int:
         return self.__upper_bound
 
-    @property
-    def is_categorical(self):
-        return not self.is_numeric and self.is_discrete
-
     def search_space(self) -> int:
         """Assume discrete search size - inaccurate for continuous vars"""
         return len(np.arange(self.lower_bound, self.upper_bound + 1))
 
     def dict_repr(self) -> Dict[str, Union[str, int]]:
         return {
-            "name": self.name,
             "lower_bound": self.lower_bound,
             "upper_bound": self.upper_bound,
         }
@@ -74,7 +60,7 @@ class ParameterSpace(ABC, Generic[SUPPORTED_TYPES]):
 
     @abstractmethod
     def transform(self, x):
-        """Transform X to be a ParameterSpace"""
+        """Transform X to be a ParameterBox"""
 
     @abstractmethod
     def inverse_transform(self, x):
@@ -87,7 +73,6 @@ class ParameterSpace(ABC, Generic[SUPPORTED_TYPES]):
     def __repr__(self) -> str:
         properties = ", ".join(
             [
-                str(self.name),
                 str(self.lower_bound),
                 str(self.upper_bound),
             ]
@@ -98,7 +83,6 @@ class ParameterSpace(ABC, Generic[SUPPORTED_TYPES]):
         return "".join(
             [
                 f"{type(self)}: "
-                f"(name: {self.name},"
                 f"lower_bound: {self.lower_bound},"
                 f"upper_bound:{self.upper_bound},"
             ]

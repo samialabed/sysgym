@@ -1,40 +1,40 @@
 import json
-from abc import ABC, abstractmethod
 from collections.abc import MutableMapping
-from typing import Iterator, List
+from typing import Iterator
 
 import numpy as np
 
-from sysgym.spaces.container import ParameterContainer
-from sysgym.spaces.schema import PARAMS_SUPPORTED_TYPE, ParamSchema
-
-# TODO: I don't like this one
+from sysgym.params import ParameterContainer, ParamsSpace
 
 
-class EnvParamsDict(ABC, MutableMapping):
+class EnvParamsDict(MutableMapping):
     """Class acting as dictionary that enforces the
-    values stored in it to confront to the defined schema"""
+    values stored in it to confront to the defined schema.
+    Allows updating from numpy, to numpy, storing to disk, and other helpful utils.
+    """
 
-    def __init__(self, schema: ParamSchema):
-        self.__container = {}
-        self._schema = schema
+    def __init__(self, params_space: ParamsSpace):
+        self._container = {}
+        self._schema = params_space
 
-        for param_space in schema.parameters():
-            self.__container[param_space.name] = ParameterContainer(space=param_space)
+        for parameter_info in params_space.parameters():
+            self._container[parameter_info.name] = ParameterContainer(
+                box=parameter_info.box
+            )
 
     def to_json(self) -> str:
         """Return json representation of the values stored."""
         return json.dumps(dict(self))
 
-    def update_from_numpy(self, Xs: np.ndarray) -> None:
+    def update_from_numpy(self, values: np.ndarray) -> None:
         """Create EnvParams values from numpy."""
-        Xs = Xs.squeeze().tolist()
-        for (param, x) in zip(self.__container, Xs):
-            self.__container[param].from_numpy(x)
+        values = values.squeeze().tolist()
+        for (param, x) in zip(self._container, values):
+            self._container[param].from_numpy(x)
 
     def reset(self) -> None:
         """Reset all values held in this container to default"""
-        for value in self.__container.values():
+        for value in self._container.values():
             value.reset()
 
     def as_numpy(self) -> np.ndarray:
@@ -42,42 +42,35 @@ class EnvParamsDict(ABC, MutableMapping):
         res = list(self.values())
         return np.array(res)
 
-    @abstractmethod
-    def as_sys(self) -> List[str]:
-        pass
-
-    def __setitem__(self, k: str, v: PARAMS_SUPPORTED_TYPE) -> None:
+    def __setitem__(self, k: str, v: any) -> None:
         """Set a parameter to the value specified."""
         try:
-            self.__container[k].value = v
+            self._container[k].value = v
         except KeyError:
             raise KeyError(f"{k} is not a parameter in {list(self)}")
 
     def __delitem__(self, k: str) -> None:
         """Reset a value to its default."""
         try:
-            parameter = self.__container[k]
+            parameter = self._container[k]
             parameter.reset()
         except KeyError:
             raise KeyError(f"{k} is not a parameter in {list(self)}")
 
-    def __getitem__(self, k: str) -> PARAMS_SUPPORTED_TYPE:
+    def __getitem__(self, k: str) -> any:
         """Retrieve the stored value in the parameter container."""
         try:
-            return self._schema[k].formula(self.__container[k].value)
+            return self._schema[k].formula(self._container[k].value)
         except KeyError:
             raise KeyError(f"{k} is not a parameter in {list(self)}")
 
     def __len__(self) -> int:
         """Number of dimensions/parameters in this container."""
-        return len(self.__container)
+        return len(self._container)
 
     def __iter__(self) -> Iterator[str]:
         """Iterator over the stored key values."""
-        return iter(self.__container)
+        return iter(self._container)
 
     def __repr__(self):
-        return repr(self.__container)
-
-    def __str__(self):
-        return str(self.as_sys())
+        return repr(self._container)

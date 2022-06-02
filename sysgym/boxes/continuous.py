@@ -1,9 +1,9 @@
 import numpy as np
 
-from sysgym.spaces.space_abc import ParameterSpace
+from sysgym.boxes.box import ParameterBox
 
 
-class ContinuousSpace(ParameterSpace[float]):
+class ContinuousBox(ParameterBox[float]):
     def sample(self, num=1, seed: int = None) -> np.ndarray:
         assert num > 0
         if seed:

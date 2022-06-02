@@ -2,3 +2,5 @@
 pyre-check
 black
 flake8
+isort
+pylint

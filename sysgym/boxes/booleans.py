@@ -2,12 +2,12 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 
-from sysgym.spaces.space_abc import ParameterSpace
+from sysgym.boxes.box import ParameterBox
 
 
-class BooleanSpace(ParameterSpace[bool]):
-    def __init__(self, name: str, default: Optional[bool] = None):
-        super().__init__(name=name, lower_bound=0, upper_bound=1, default=default)
+class BooleanBox(ParameterBox[bool]):
+    def __init__(self, default: Optional[bool] = None):
+        super().__init__(lower_bound=0, upper_bound=1, default=default)
 
     def sample(self, num: int = 1, seed: int = None) -> np.ndarray:
         assert num > 0
@@ -18,7 +18,6 @@ class BooleanSpace(ParameterSpace[bool]):
 
     def dict_repr(self) -> Dict[str, Union[str, List[bool]]]:
         return {
-            "name": self.name,
             "categories": [True, False],
         }
 

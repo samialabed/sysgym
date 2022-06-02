@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class BenchmarkStats:
+class SummaryStats:
     # main three objectives
     cycle: int
     total_area: int

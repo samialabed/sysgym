@@ -2,13 +2,16 @@ from typing import Generic
 
 import numpy as np
 
-from sysgym.spaces.space_abc import SUPPORTED_TYPES, ParameterSpace
+from sysgym.boxes.box import SUPPORTED_TYPES, ParameterBox
 
 
 class ParameterContainer(Generic[SUPPORTED_TYPES]):
-    def __init__(self, space: ParameterSpace):
-        self.__space = space
-        self.__value = space.default
+    """A container that holds the value of a parameter and ensure it adheres to
+    parameter box"""
+
+    def __init__(self, box: ParameterBox):
+        self.__space = box
+        self.__value = box.default
 
     def as_numpy(self) -> np.ndarray:
         pass

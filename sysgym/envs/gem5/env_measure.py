@@ -4,19 +4,19 @@ from typing import Dict
 
 from dataclasses_json import dataclass_json
 
-from sysgym.envs.env_measure import EnvMeasurements
-from sysgym.envs.gem5.parsers.stats_parser import Gem5AllStatistics
-from sysgym.envs.gem5.stats.bench_stats import BenchmarkStats
+from sysgym.env_abc import EnvMetrics
+from sysgym.envs.gem5.stats.bench_stats import SummaryStats
+from sysgym.envs.gem5.stats.detailed_stats import Gem5DetailedStats
 
 
 @dataclass_json
 @dataclass(frozen=True)
-class Gem5Measures(EnvMeasurements):
-    bench_stats: BenchmarkStats
-    detailed_stats: Gem5AllStatistics
+class Gem5Metrics(EnvMetrics):
+    summary_stats: SummaryStats
+    detailed_stats: Gem5DetailedStats
 
     def as_flat_dict(self) -> Dict[str, any]:
-        bench_stats_dict = asdict(self.bench_stats)
+        bench_stats_dict = asdict(self.summary_stats)
         detailed_stats_dict = self.detailed_stats.as_dict()
 
         return {**bench_stats_dict, **detailed_stats_dict}
@@ -24,7 +24,7 @@ class Gem5Measures(EnvMeasurements):
     @property
     def log_pdp(self) -> float:
         """pdp: power * 1/time"""
-        return math.log(self.bench_stats.avg_power) + math.log(
+        return math.log(self.summary_stats.avg_power) + math.log(
             1 / self.detailed_stats.system.sim_seconds
         )
 
@@ -36,7 +36,9 @@ class Gem5Measures(EnvMeasurements):
     @property
     def pdp(self) -> float:
         """pdp: power * 1/time"""
-        return self.bench_stats.avg_power * (1 / self.detailed_stats.system.sim_seconds)
+        return self.summary_stats.avg_power * (
+            1 / self.detailed_stats.system.sim_seconds
+        )
 
     @property
     def epd(self) -> float:

@@ -1,11 +1,11 @@
 import unittest
 
-from sysgym.spaces import BooleanSpace, ParameterContainer
+from sysgym.boxes import BooleanBox, ParameterContainer
 
 
 class TestParametersContainer(unittest.TestCase):
     def test_container_values_get_and_set(self):
-        test_space = BooleanSpace(name="test_container", default=False)
+        test_space = BooleanBox(name="test_container", default=False)
         test_container = ParameterContainer(test_space)
         self.assertEqual(
             test_container.value,

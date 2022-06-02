@@ -5,12 +5,12 @@ from typing import Optional
 from parameterized import parameterized
 
 from sysgym.envs.gem5.parsers import parse_summary_file
-from sysgym.envs.gem5.stats import BenchmarkStats
+from sysgym.envs.gem5.stats import SummaryStats
 
 RESOURCE_DIR = Path(__file__).parent / "resources"
 
 
-class TestCompactionStatsParserHelpers(unittest.TestCase):
+class TestSummaryParser(unittest.TestCase):
     @parameterized.expand(
         [
             (
@@ -19,7 +19,7 @@ class TestCompactionStatsParserHelpers(unittest.TestCase):
                 # input
                 "fft_transpose/fft_transpose_summary",
                 # expected
-                BenchmarkStats(
+                SummaryStats(
                     cycle=24156,
                     total_area=962188,
                     avg_power=22.0119,
@@ -43,7 +43,7 @@ class TestCompactionStatsParserHelpers(unittest.TestCase):
         ]
     )
     def test_parse_compaction_level_return_empty_for_invalid_strings(
-        self, name: str, input: str, expected: Optional[BenchmarkStats]
+        self, name: str, input: str, expected: Optional[SummaryStats]
     ):
         actual = parse_summary_file(RESOURCE_DIR / input)
         self.assertEqual(

@@ -1,7 +1,10 @@
 import re
 
 FLOAT_NUM_PARSER = r"\d+.?\d*[e\+[0-9]+]?"
-summary_file_regex = {
+VALUE_REGEX = r"([\d+.?\d*[e\+[0-9]+]?|nan|inf)"
+KEY_TO_VALUE_REGEX = r"^(\w+(?:\.\w+)+)"
+
+SUMMARY_PARSERS = {
     "cycle": re.compile(r"(.*) cycles"),
     "avg_power": re.compile(r"(.*) mW"),
     "idle_fu_cycles": re.compile(r"(.*) cycles"),
@@ -22,10 +25,10 @@ summary_file_regex = {
     "num_shifters": re.compile(r"(.*)"),
     "num_registers": re.compile(r"(.*)"),
 }
-system_parser = re.compile(
+SYSTEM_RES_PARSER = re.compile(
     rf"^(\w+)\s+({FLOAT_NUM_PARSER})", flags=re.RegexFlag.MULTILINE
 )
-val_re = r"([\d+.?\d*[e\+[0-9]+]?|nan|inf)"
-dis_func_re = r"::(\D\S+)"
-key_re = r"^(\w+(?:\.\w+)+)"
-performance_parser = re.compile(rf"{key_re}\s+{val_re}", flags=re.RegexFlag.MULTILINE)
+PERFORMANCE_PARSER = re.compile(
+    rf"{KEY_TO_VALUE_REGEX}\s+{VALUE_REGEX}", flags=re.RegexFlag.MULTILINE
+)
+CACHE_STATS_PARSER = re.compile(rf"(\S+) ({FLOAT_NUM_PARSER})")
