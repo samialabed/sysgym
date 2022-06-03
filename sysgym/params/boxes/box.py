@@ -25,7 +25,7 @@ class ParamBox(ABC, Generic[SUPPORTED_TYPES]):
         self.__upper_bound = upper_bound
         self.__default = default
         self.formula = formula
-        self.value = default
+        self._value = default
 
         assert (
             self.lower_bound < self.upper_bound
@@ -34,19 +34,19 @@ class ParamBox(ABC, Generic[SUPPORTED_TYPES]):
     @property
     def value(self) -> SUPPORTED_TYPES:
         """Stored value inside the box"""
-        return self._value
+        return self.formula(self._value)
 
     def reset(self):
         """Reset the parameter to its default value."""
         self.value = self.default
 
     @value.setter
-    def value(self, value: SUPPORTED_TYPES):
-        if value in self:
-            self._value = value
+    def value(self, new_val: SUPPORTED_TYPES):
+        if new_val in self:  # is in the bounds
+            self._value = new_val
         else:
             raise ValueError(
-                f"Value ({value}) being set outside the bounds({self.bounds})"
+                f"Value ({new_val}) being set outside the bounds({self.bounds})"
             )
 
     @property

@@ -16,14 +16,10 @@ from sysgym.envs.gem5.benchmarks.benchmark_eval_planner import (
 from sysgym.envs.gem5.benchmarks.benchmark_settings import Gem5BenchmarkConfig
 from sysgym.envs.gem5.benchmarks.benchmark_tasks_timeout import TASK_TO_TIMEOUT_SECONDS
 from sysgym.envs.gem5.benchmarks.exception import DockerExecutionException
-
-# Constant container settings
 from sysgym.envs.gem5.env_measure import Gem5Metrics
 from sysgym.envs.gem5.parsers import parse_statistics, parse_summary_file
 from sysgym.param_dict import EnvParamsDict
 
-WORKSPACE_ROOT_DIR = "/workspace"
-PATH_TO_GEM_WORKSPACE = "/workspace/gem5-aladdin"
 LOG = logging.getLogger("sysgym")
 
 
@@ -32,6 +28,8 @@ class Gem5ContainerSettings:
     gem_docker_volume: str
     container_name: str
     docker_img: str
+    root_workspace_dir: str = "/workspace"
+    gem_workspace_dir: str = "/workspace/gem5-aladdin"
 
 
 class Gem5BenchmarkDocker:
@@ -69,7 +67,9 @@ class Gem5BenchmarkDocker:
         self._exec_benchmark = timeout(seconds=task_timeout_secs)(self._exec_benchmark)
 
         self._gem5_container: Optional[Container] = None
-        self._compiled_sim_path = f"{WORKSPACE_ROOT_DIR}/compiled_simulation/"
+        self._compiled_sim_path = (
+            f"{self._container_settings.root_workspace_dir}/compiled_simulation/"
+        )
 
     def initialize(self):
         self._gem5_container = self._get_gem5_container(
@@ -80,7 +80,8 @@ class Gem5BenchmarkDocker:
     def cleanup(self, container: Container):
         LOG.debug("Cleaning up container %s.", container.name)
         container.exec_run(
-            workdir=WORKSPACE_ROOT_DIR, cmd=f"rm -r {self._compiled_sim_path}"
+            workdir=self._container_settings.root_workspace_dir,
+            cmd=f"rm -r {self._compiled_sim_path}",
         )
         container.kill()
         sleep(10)  # wait for the container to properly close
@@ -94,7 +95,7 @@ class Gem5BenchmarkDocker:
         try:
             # build the task directory structure
             status = self._gem5_container.exec_run(
-                workdir=WORKSPACE_ROOT_DIR,
+                workdir=self._container_settings.root_workspace_dir,
                 cmd=f"mkdir -p {self._compiled_sim_path}",
             )
             if status.exit_code != 0:
@@ -126,7 +127,7 @@ class Gem5BenchmarkDocker:
                 )
 
             # Generate the benchmark_container according to the execution plan
-            workspace_dir = PATH_TO_GEM_WORKSPACE
+            workspace_dir = self._container_settings.gem_workspace_dir
 
             status = self._gem5_container.exec_run(
                 workdir=f"{workspace_dir}/sweeps/benchmarks",
@@ -234,7 +235,7 @@ class Gem5BenchmarkDocker:
         LOG.debug("Creating container %s.", container_name)
         persistent_volume = Mount(
             source=self._container_settings.gem_docker_volume,
-            target=WORKSPACE_ROOT_DIR,
+            target=self._container_settings.root_workspace_dir,
         )
 
         # Check if we need to create the volume and compile all libraries

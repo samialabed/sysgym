@@ -51,7 +51,7 @@ def repeat_env(num_times: int):
                 env_metrics = func(*args, **kwargs)
                 # nested dictionary
                 env_measures_asdict = asdict(env_metrics)
-                # TODO: seems inefficient? but even if we are using numpy/pandas we
+                # TODO: inefficient? but even if we are using numpy/pandas we
                 #  will still need to loop through the array to build it
                 #  Vectorization might not be worth it especially since the repetition
                 #  usually 3-5

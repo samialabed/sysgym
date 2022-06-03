@@ -14,10 +14,9 @@ class EnvParamsDict(MutableMapping):
     Allows updating from numpy, to numpy, storing to disk, and other helpful utils.
     """
 
-    def __init__(self, params_space: ParamsSpace):
+    def __init__(self, param_space: ParamsSpace):
         self._container: Dict[str, ParamBox] = {}
-        self._schema = params_space
-        for parameter_info in params_space.parameters():
+        for parameter_info in param_space.parameters():
             self._container[parameter_info.name] = parameter_info.box
 
     def to_json(self) -> str:
@@ -32,8 +31,8 @@ class EnvParamsDict(MutableMapping):
 
     def reset(self) -> None:
         """Reset all values held in this container to default"""
-        for value in self._container.values():
-            value.reset()
+        for param_box in self._container.values():
+            param_box.reset()
 
     def as_numpy(self) -> np.ndarray:
         """Return the stored value as numpy."""
@@ -56,9 +55,9 @@ class EnvParamsDict(MutableMapping):
             raise KeyError(f"{k} is not a parameter in {list(self)}")
 
     def __getitem__(self, k: str) -> any:
-        """Retrieve the stored value in the parameter container."""
+        """Retrieve the stored value in the parameter box."""
         try:
-            return self._schema[k].formula(self._container[k].value)
+            return self._container[k].value
         except KeyError:
             raise KeyError(f"{k} is not a parameter in {list(self)}")
 

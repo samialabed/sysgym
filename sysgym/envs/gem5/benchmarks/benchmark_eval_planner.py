@@ -9,16 +9,15 @@ def from_env_params_to_sys(env_params: EnvParamsDict) -> List[str]:
     # TODO: workaround dependency until we do a refactor for hierarchcail parameter
     opts = []
 
-    for param in env_params._schema.parameters():
-        val = env_params[param.name]
-        if param.name == "cache_size":
+    for (param_name, val) in env_params.items():
+        if param_name == "cache_size":
             # Cache_size has to be x * cache_line_sz * cache_assoc
             val = val * env_params["cache_line_sz"] * env_params["cache_assoc"]
-        elif param.name == "tlb_entries":
+        elif param_name == "tlb_entries":
             # Note: tlb_entries has to be tlb_entries * tlb_assoc
             val = val * env_params["tlb_assoc"]
 
-        opts.append(f"set {param.name} {val}")
+        opts.append(f"set {param_name} {val}")
     return opts
 
 

@@ -111,6 +111,10 @@ class ParamsSpace(Mapping):
         field_val: ParamBox = getattr(self, param_name)
         return field_val
 
+    def __setitem__(self, param_name: str, value):
+        field_val: ParamBox = getattr(self, param_name)
+        field_val.value = value
+
     def __len__(self) -> int:
         return len(fields(self))
 
