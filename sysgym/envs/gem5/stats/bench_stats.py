@@ -1,4 +1,3 @@
-import math
 from dataclasses import dataclass
 
 
@@ -34,13 +33,3 @@ class SummaryStats:
     num_bitwise_operators: float = 0.0
     num_multipliers: float = 0.0
     num_shifters: float = 0.0
-
-    @property
-    def deprecated_pdp(self) -> float:
-        """Deprecated pdp: used to be cycle  * power, now it is power * 1/time"""
-        return self.avg_power * self.cycle
-
-    @property
-    def deprecated_epd(self) -> float:
-        """Deprecated EPD: used to be cycle^2* power, now it is power * 1/time^2"""
-        return math.log(self.deprecated_pdp * self.cycle)

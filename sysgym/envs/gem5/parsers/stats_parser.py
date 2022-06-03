@@ -1,6 +1,9 @@
 from pathlib import Path
 
-from sysgym.envs.gem5.stats.detailed_stats import Gem5DetailedStats
+import pandas as pd
+
+from sysgym.envs.gem5.parsers.regex import PERFORMANCE_PARSER, SYSTEM_RES_PARSER
+from sysgym.envs.gem5.stats import Gem5DetailedStats, Gem5SystemStats
 
 
 def parse_statistics(stats_fp: Path) -> Gem5DetailedStats:
@@ -20,7 +23,20 @@ def parse_statistics(stats_fp: Path) -> Gem5DetailedStats:
             # reason to not use enumerate: some lines are empty
             continue
 
-        system_stats = Gem5DetailedStats.populate_from_sim(sim)
+        # parse the lines and find the core system params and performance params
+        all_lines_with_system_info = SYSTEM_RES_PARSER.findall(sim)
+        all_lines_with_perf_info = PERFORMANCE_PARSER.findall(sim)
+
+        # Create a DF of the parameters
+        performance_df = (
+            pd.DataFrame(all_lines_with_perf_info).set_index(0).T.astype(float)
+        )
+
+        system_stats = Gem5DetailedStats(
+            system=Gem5SystemStats.from_dict(dict(all_lines_with_system_info)),
+            performance=performance_df,
+        )
+
         if cumulative_system_metrics is None:
             cumulative_system_metrics = system_stats
         else:

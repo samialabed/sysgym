@@ -43,9 +43,9 @@ class TestSummaryParser(unittest.TestCase):
         ]
     )
     def test_parse_compaction_level_return_empty_for_invalid_strings(
-        self, name: str, input: str, expected: Optional[SummaryStats]
+        self, name: str, summary_path: str, expected: Optional[SummaryStats]
     ):
-        actual = parse_summary_file(RESOURCE_DIR / input)
+        actual = parse_summary_file(RESOURCE_DIR / summary_path)
         self.assertEqual(
             expected, actual, f"failed test {name} expected {expected}, actual {actual}"
         )

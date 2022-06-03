@@ -3,7 +3,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from sysgym.env_abc import Environment, EnvMetrics
 from sysgym.envs.gem5.benchmarks.benchmark_docker import Gem5BenchmarkDocker
 from sysgym.envs.gem5.env_cfg import Gem5EnvConfig
-from sysgym.params.param_dict import EnvParamsDict
+from sysgym.param_dict import EnvParamsDict
 
 
 class Gem5(Environment):

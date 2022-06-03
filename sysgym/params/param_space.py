@@ -4,12 +4,12 @@ from typing import Dict, Iterator, List, NamedTuple, Tuple
 
 import numpy as np
 
-from sysgym.boxes.box import ParameterBox
+from sysgym.params.boxes import ParamBox
 
 
 class ParameterInfo(NamedTuple):
     name: str
-    box: ParameterBox
+    box: ParamBox
 
 
 @dataclass(frozen=True)
@@ -24,16 +24,16 @@ class ParamsSpace(Mapping):
         # TODO(global context): add check here to only evaluate paramspace when debug on
         all_params = fields(self)
         for f in all_params:
-            # Ensure all members subclass ParameterBox
+            # Ensure all members subclass ParamBox
             assert issubclass(
-                f.type, ParameterBox
-            ), f" {f.name} does not subclass ParameterBox."
+                f.type, ParamBox
+            ), f" {f.name} does not subclass ParamBox."
 
     def parameters(self) -> List[ParameterInfo]:
         params = []
         for f in fields(self):
             param_name = f.name
-            param_box: ParameterBox = getattr(self, param_name)
+            param_box: ParamBox = getattr(self, param_name)
             params.append(ParameterInfo(name=param_name, box=param_box))
         return params
 
@@ -41,7 +41,7 @@ class ParamsSpace(Mapping):
         """Sample all parameters within their bounds."""
         vals = []
         for f in fields(self):
-            field_val: ParameterBox = getattr(self, f.name)
+            field_val: ParamBox = getattr(self, f.name)
             vals.append(field_val.sample(num=num, seed=seed))
         return np.array(vals)
 
@@ -49,7 +49,7 @@ class ParamsSpace(Mapping):
         """Return a np.ndarray containing tuples of lower and upper bounds."""
         bounds: List[List[str, int, int]] = []  # list of lower, upper bounds
         for f in fields(self):
-            param_space: ParameterBox = getattr(self, f.name)
+            param_space: ParamBox = getattr(self, f.name)
             lower, upper = param_space.scaled_bounds
             param_name = f.name
             bounds.append([param_name, lower, upper])
@@ -59,7 +59,7 @@ class ParamsSpace(Mapping):
         """Return a ndarray containing tuples of lower and upper bounds."""
         bounds: List[Tuple[int, int]] = []  # list of lower, upper bounds
         for f in fields(self):
-            param_space: ParameterBox = getattr(self, f.name)
+            param_space: ParamBox = getattr(self, f.name)
             if use_formula:
                 param_bounds = param_space.scaled_bounds
             else:
@@ -73,7 +73,7 @@ class ParamsSpace(Mapping):
         for f in fields(self):
             key = f.name
             param_val = params[key]
-            param_space: ParameterBox = getattr(self, key)
+            param_space: ParamBox = getattr(self, key)
             res.append(param_space.transform(param_val))
         return np.array(res)
 
@@ -82,12 +82,12 @@ class ParamsSpace(Mapping):
         values = values.squeeze().tolist()
         res = {}
         for (f, x) in zip(fields(self), values):
-            param_space: ParameterBox = getattr(self, f.name)
-            res[f.name] = param_space.inverse_transform(x)
+            param_space: ParamBox = getattr(self, f.name)
+            res[f.name] = param_space.from_numpy(x)
         return res
 
     @staticmethod
-    def spaces_to_json(spaces: Dict[str, ParameterBox]) -> List[Dict]:
+    def spaces_to_json(spaces: Dict[str, ParamBox]) -> List[Dict]:
         """Used to convert the held spaces to json for dataclasses."""
         all_params = []
         for (param_name, param_space) in spaces.items():
@@ -98,7 +98,7 @@ class ParamsSpace(Mapping):
     def number_of_choices(self) -> int:
         search_sizes = []
         for f in fields(self):
-            field_val: ParameterBox = getattr(self, f.name)
+            field_val: ParamBox = getattr(self, f.name)
             print(f"{f.name}: Search size is: {field_val.search_space()}")
             print(
                 f"{f.name}: Search space is: "
@@ -107,12 +107,12 @@ class ParamsSpace(Mapping):
             search_sizes.append(field_val.search_space())
         return np.product(search_sizes)
 
-    def __getitem__(self, param_name: str) -> ParameterBox:
-        field_val: ParameterBox = getattr(self, param_name)
+    def __getitem__(self, param_name: str) -> ParamBox:
+        field_val: ParamBox = getattr(self, param_name)
         return field_val
 
     def __len__(self) -> int:
         return len(fields(self))
 
-    def __iter__(self) -> Iterator[Dict[str, ParameterBox]]:
+    def __iter__(self) -> Iterator[Dict[str, ParamBox]]:
         return iter({f.name: getattr(self, f.name) for f in fields(self)})

@@ -4,7 +4,6 @@ from typing import Dict
 
 import pandas as pd
 
-from sysgym.envs.gem5.parsers.regex import PERFORMANCE_PARSER, SYSTEM_RES_PARSER
 from sysgym.envs.gem5.stats.system_stats import Gem5SystemStats
 
 
@@ -13,21 +12,18 @@ class Gem5DetailedStats:
     system: Gem5SystemStats
     performance: pd.DataFrame
 
+    @staticmethod
+    def from_df(
+        system_df: pd.DataFrame, performance_df: pd.DataFrame
+    ) -> "Gem5DetailedStats":
+        return Gem5DetailedStats(
+            system=Gem5SystemStats.from_df(system_df), performance=performance_df
+        )
+
     def as_dict(self) -> Dict[str, any]:
         system_dict = dataclasses.asdict(self.system)
         performance_dict = self.performance.to_dict(orient="records")[0]
         return {**system_dict, **performance_dict}
-
-    @staticmethod
-    def populate_from_sim(sim: str):
-        system_df = (
-            pd.DataFrame(SYSTEM_RES_PARSER.findall(sim)).set_index(0).T.astype(float)
-        )
-
-        performance_df = (
-            pd.DataFrame(PERFORMANCE_PARSER.findall(sim)).set_index(0).T.astype(float)
-        )
-        return Gem5DetailedStats(system=system_df, performance=performance_df)
 
     def __add__(self, other: "Gem5DetailedStats"):
         res = {}

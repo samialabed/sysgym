@@ -1,13 +1,12 @@
 import dataclasses
 from dataclasses import dataclass
+from typing import Dict
 
 import pandas as pd
 
-from sysgym.envs.gem5.parsers.regex import SYSTEM_RES_PARSER
-
 
 @dataclass
-class Gem5SystemStats(object):
+class Gem5SystemStats:
     final_tick: int = 0  # Number of ticks from beginning of simulation
     host_inst_rate: int = 0  # Simulator instruction rate (inst/s)
     host_mem_usage: int = 0  # Number of bytes of host memory used
@@ -24,21 +23,29 @@ class Gem5SystemStats(object):
 
     @staticmethod
     def from_df(df: pd.DataFrame) -> "Gem5SystemStats":
-        return Gem5SystemStats(**df.to_dict())
+        stats_input = {}
+        for field in dataclasses.fields(Gem5SystemStats):
+            stats_input[field.name] = df[field.name].values
+        stats = Gem5SystemStats(**stats_input)
+        return stats
 
     @staticmethod
-    def from_str(s: str) -> "Gem5SystemStats":
-        parsed_stats = dict(SYSTEM_RES_PARSER.findall(s))
-
-        stats = {}
+    def from_dict(res: Dict[str, any]) -> "Gem5SystemStats":
+        stats_input = {}
         for f in dataclasses.fields(Gem5SystemStats):
-            stats[f.name] = f.type(parsed_stats[f.name])
-        return Gem5SystemStats(**stats)
+            stats_input[f.name] = f.type(res[f.name])
+        stats = Gem5SystemStats(**stats_input)
+        return stats
 
     def __add__(self, other: "Gem5SystemStats"):
         res = {}
         for f in dataclasses.fields(self):
             field_name = f.name
-            res[field_name] = getattr(self, field_name) + getattr(other, field_name)
+            if field_name == "final_tick":
+                res[field_name] = max(
+                    getattr(self, field_name), getattr(other, field_name)
+                )
+            else:
+                res[field_name] = getattr(self, field_name) + getattr(other, field_name)
 
         return Gem5SystemStats(**res)

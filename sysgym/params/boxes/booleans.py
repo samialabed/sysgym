@@ -2,10 +2,10 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 
-from sysgym.boxes.box import ParameterBox
+from sysgym.params.boxes.box import ParamBox
 
 
-class BooleanBox(ParameterBox[bool]):
+class BooleanBox(ParamBox[bool]):
     def __init__(self, default: Optional[bool] = None):
         super().__init__(lower_bound=0, upper_bound=1, default=default)
 
@@ -25,6 +25,6 @@ class BooleanBox(ParameterBox[bool]):
         """Return 0 for False and 1 for True."""
         return float(x)
 
-    def inverse_transform(self, x: float) -> bool:
+    def from_numpy(self, x: float) -> bool:
         """Assign True to floats over 0.5"""
         return x > 0.5

@@ -7,7 +7,7 @@ from typing import Callable, Dict
 import dacite
 
 from sysgym.env_abc import EnvMetrics
-from sysgym.params.param_dict import EnvParamsDict
+from sysgym.param_dict import EnvParamsDict
 
 LOG = logging.getLogger("sysgym")
 

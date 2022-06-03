@@ -1,22 +1,23 @@
 import unittest
 
-from sysgym.boxes import BooleanBox, ParameterContainer
+from sysgym.params.boxes import BooleanBox
 
 
-class TestParametersContainer(unittest.TestCase):
-    def test_container_values_get_and_set(self):
-        test_space = BooleanBox(name="test_container", default=False)
-        test_container = ParameterContainer(test_space)
+class TestParametersBox(unittest.TestCase):
+    def test_box_values_get_and_set(self):
+
+        test_value = False
+        test_space = BooleanBox(default=test_value)
         self.assertEqual(
-            test_container.value,
             test_space.default,
+            test_value,
             "Assert the default value is propagated into the container",
         )
 
         new_value = True
-        test_container.value = new_value
+        test_space.value = new_value
         self.assertEqual(
-            test_container.value,
+            test_space.value,
             new_value,
             "Assert the new value updates the container ",
         )

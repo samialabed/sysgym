@@ -13,7 +13,6 @@ class Gem5EnvConfig(EnvConfig):
     container_settings: Gem5ContainerSettings
     bench_cfg: Gem5BenchmarkConfig
     retry_attempt: int  # number of times to retry in case of env failure
-    repeat_eval: int = 1  # gem5 is a deterministic simulator no need to repeat
 
     @property
     def name(self) -> str:

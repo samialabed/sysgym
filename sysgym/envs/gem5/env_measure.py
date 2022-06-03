@@ -5,8 +5,7 @@ from typing import Dict
 from dataclasses_json import dataclass_json
 
 from sysgym.env_abc import EnvMetrics
-from sysgym.envs.gem5.stats.bench_stats import SummaryStats
-from sysgym.envs.gem5.stats.detailed_stats import Gem5DetailedStats
+from sysgym.envs.gem5.stats import Gem5DetailedStats, SummaryStats
 
 
 @dataclass_json

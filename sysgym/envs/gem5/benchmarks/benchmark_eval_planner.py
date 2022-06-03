@@ -2,7 +2,7 @@ from string import Template
 from typing import List
 
 from sysgym.envs.gem5.benchmarks.benchmark_settings import Gem5BenchmarkConfig
-from sysgym.params.param_dict import EnvParamsDict
+from sysgym.param_dict import EnvParamsDict
 
 
 def from_env_params_to_sys(env_params: EnvParamsDict) -> List[str]:

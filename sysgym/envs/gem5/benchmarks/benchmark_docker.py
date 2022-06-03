@@ -20,7 +20,7 @@ from sysgym.envs.gem5.benchmarks.exception import DockerExecutionException
 # Constant container settings
 from sysgym.envs.gem5.env_measure import Gem5Metrics
 from sysgym.envs.gem5.parsers import parse_statistics, parse_summary_file
-from sysgym.params.param_dict import EnvParamsDict
+from sysgym.param_dict import EnvParamsDict
 
 WORKSPACE_ROOT_DIR = "/workspace"
 PATH_TO_GEM_WORKSPACE = "/workspace/gem5-aladdin"

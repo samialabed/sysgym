@@ -2,10 +2,10 @@ from typing import Callable
 
 import numpy as np
 
-from sysgym.boxes.box import ParameterBox
+from sysgym.params.boxes.box import ParamBox
 
 
-class DiscreteBox(ParameterBox[int]):
+class DiscreteBox(ParamBox[int]):
     def __init__(
         self,
         lower_bound: int,
@@ -37,6 +37,6 @@ class DiscreteBox(ParameterBox[int]):
     def transform(self, x: int) -> float:
         return float(x)
 
-    def inverse_transform(self, x: float) -> int:
+    def from_numpy(self, x: float) -> int:
         x = int(round(x))
         return x

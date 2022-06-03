@@ -1,6 +1,7 @@
 import re
 
-FLOAT_NUM_PARSER = r"\d+.?\d*[e\+[0-9]+]?"
+E_NUM_REGEX = r"(?:e[\+\-][0-9]+)?"
+FLOAT_NUM_PARSER = rf"\d+.?\d*{E_NUM_REGEX}"  # Support nums like e-35 and e+2
 VALUE_REGEX = r"([\d+.?\d*[e\+[0-9]+]?|nan|inf)"
 KEY_TO_VALUE_REGEX = r"^(\w+(?:\.\w+)+)"
 

@@ -10,11 +10,11 @@ def parse_cache_stats_file(cache_stats_fp: Path) -> CacheStats:
     with open(cache_stats_fp) as f:
         contents = f.read()
     matched_res = CACHE_STATS_PARSER.findall(contents)
-    parsed_results = {k: float(v) for k, v in matched_res}
+    parsed_results = {_clean_key(k): float(v) for k, v in matched_res}
 
     return CacheStats(**parsed_results)
 
 
 def _clean_key(k: str) -> str:
     """Make sure the name is compatible with cache stats"""
-    return k.replace("-", "_")
+    return k.replace("-", "_").replace(".", "_").replace(" ", "_")

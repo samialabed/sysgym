@@ -3,10 +3,10 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
-from sysgym.boxes.box import ParameterBox
+from sysgym.params.boxes.box import ParamBox
 
 
-class CategoricalBox(ParameterBox[str]):
+class CategoricalBox(ParamBox[str]):
     def __init__(self, categories: List[str], default: Optional[str] = None):
         self.categories = categories
         num_cats = len(self.categories)
@@ -34,10 +34,10 @@ class CategoricalBox(ParameterBox[str]):
         else:
             samples = np.random.randint(self.lower_bound, self.upper_bound + 1, num)
 
-        return self.inverse_transform(samples)
+        return self.from_numpy(samples)
 
     def transform(self, x: np.ndarray) -> np.ndarray:
         return self.__encoder.transform(x.astype(str).reshape(-1))
 
-    def inverse_transform(self, x: np.ndarray):
+    def from_numpy(self, x: np.ndarray):
         return self.__encoder.inverse_transform(x.round().astype(int).reshape(-1))

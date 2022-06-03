@@ -1,9 +1,9 @@
 from typing import Dict, Optional
 
-from sysgym.boxes.box import ParameterBox
+from sysgym.params.boxes.box import ParamBox
 
 
-class UnboundedBox(ParameterBox):
+class UnboundedBox(ParamBox):
     def __init__(self, default: Optional[any] = None):
         super().__init__(
             lower_bound=float("-inf"),
@@ -20,5 +20,5 @@ class UnboundedBox(ParameterBox):
     def transform(self, x):
         return x
 
-    def inverse_transform(self, x):
+    def from_numpy(self, x):
         return x

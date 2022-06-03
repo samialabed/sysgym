@@ -1,9 +1,9 @@
 import numpy as np
 
-from sysgym.boxes.box import ParameterBox
+from sysgym.params.boxes.box import ParamBox
 
 
-class ContinuousBox(ParameterBox[float]):
+class ContinuousBox(ParamBox[float]):
     def sample(self, num=1, seed: int = None) -> np.ndarray:
         assert num > 0
         if seed:
@@ -14,7 +14,7 @@ class ContinuousBox(ParameterBox[float]):
     def transform(self, x: float) -> float:
         return x
 
-    def inverse_transform(self, x: float) -> float:
+    def from_numpy(self, x: float) -> float:
         return x
 
     def __contains__(self, value: float):

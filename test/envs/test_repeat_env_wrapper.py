@@ -3,10 +3,7 @@ from typing import Callable, Dict, NamedTuple
 
 from parameterized import parameterized
 
-from sysgym.decorators.repeat_env_wrapper import (
-    map_nested_dicts_modify,
-    moving_avg_func,
-)
+from sysgym.wrappers import repeat_env_wrapper
 
 
 class MovingAverageTestInput(NamedTuple):
@@ -59,7 +56,9 @@ class TestMapFunctionToNestedMap(unittest.TestCase):
                         "Children": {"Ham": 2.0, "Me": 2},
                     },
                 },
-                func=lambda prev_val, new_val: moving_avg_func(prev_val, new_val, n=2),
+                func=lambda prev_val, new_val: repeat_env_wrapper.moving_avg_func(
+                    prev_val, new_val, n=2
+                ),
                 func_input={
                     "Sad": 4.0,
                     "Family": {
@@ -87,7 +86,7 @@ class TestMapFunctionToNestedMap(unittest.TestCase):
         func_input: Dict,
         expected_output: Dict,
     ):
-        map_nested_dicts_modify(
+        repeat_env_wrapper.map_nested_dicts_modify(
             mutable_ob=existing_map, new_observations=func_input, func=func
         )
         self.assertEqual(
@@ -126,7 +125,9 @@ class TestMovingAverage(unittest.TestCase):
     def test_moving_average_calculating_avg(
         self, name: str, prev_val: float, new_val: float, n: int, expected: float
     ):
-        actual = moving_avg_func(prev_avg=prev_val, new_val=new_val, n=n)
+        actual = repeat_env_wrapper.moving_avg_func(
+            prev_avg=prev_val, new_val=new_val, n=n
+        )
         self.assertEqual(
             expected,
             actual,

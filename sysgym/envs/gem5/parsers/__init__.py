@@ -1,4 +1,3 @@
-# TODO: Limit import
 from sysgym.envs.gem5.parsers.cache_stats_parser import parse_cache_stats_file
 from sysgym.envs.gem5.parsers.exceptions import ParserException
 from sysgym.envs.gem5.parsers.stats_parser import parse_statistics

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 import sysgym.utils.converters as conv
-from sysgym.boxes import DiscreteBox
+from sysgym.params.boxes import DiscreteBox
 from sysgym.params.param_space import ParamsSpace
 
 

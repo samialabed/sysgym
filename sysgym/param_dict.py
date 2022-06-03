@@ -1,10 +1,11 @@
 import json
 from collections.abc import MutableMapping
-from typing import Iterator
+from typing import Dict, Iterator
 
 import numpy as np
 
-from sysgym.params import ParameterContainer, ParamsSpace
+from sysgym.params import ParamsSpace
+from sysgym.params.boxes import ParamBox
 
 
 class EnvParamsDict(MutableMapping):
@@ -14,13 +15,10 @@ class EnvParamsDict(MutableMapping):
     """
 
     def __init__(self, params_space: ParamsSpace):
-        self._container = {}
+        self._container: Dict[str, ParamBox] = {}
         self._schema = params_space
-
         for parameter_info in params_space.parameters():
-            self._container[parameter_info.name] = ParameterContainer(
-                box=parameter_info.box
-            )
+            self._container[parameter_info.name] = parameter_info.box
 
     def to_json(self) -> str:
         """Return json representation of the values stored."""

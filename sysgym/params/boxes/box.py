@@ -7,7 +7,13 @@ import numpy as np
 SUPPORTED_TYPES = TypeVar("SUPPORTED_TYPES", int, bool, float, str)  # container types
 
 
-class ParameterBox(ABC, Generic[SUPPORTED_TYPES]):
+class ParamBox(ABC, Generic[SUPPORTED_TYPES]):
+    """
+    Box that contains the parameter and stores it.
+    It ensures the value stored in the box adheres to the bounds provided.
+
+    """
+
     def __init__(
         self,
         lower_bound: SUPPORTED_TYPES,
@@ -19,10 +25,29 @@ class ParameterBox(ABC, Generic[SUPPORTED_TYPES]):
         self.__upper_bound = upper_bound
         self.__default = default
         self.formula = formula
+        self.value = default
 
         assert (
             self.lower_bound < self.upper_bound
         ), f"Lower bound {self.lower_bound} >= upper bound: {self.upper_bound}"
+
+    @property
+    def value(self) -> SUPPORTED_TYPES:
+        """Stored value inside the box"""
+        return self._value
+
+    def reset(self):
+        """Reset the parameter to its default value."""
+        self.value = self.default
+
+    @value.setter
+    def value(self, value: SUPPORTED_TYPES):
+        if value in self:
+            self._value = value
+        else:
+            raise ValueError(
+                f"Value ({value}) being set outside the bounds({self.bounds})"
+            )
 
     @property
     def bounds(self) -> Tuple[int, int]:
@@ -63,7 +88,7 @@ class ParameterBox(ABC, Generic[SUPPORTED_TYPES]):
         """Transform X to be a ParameterBox"""
 
     @abstractmethod
-    def inverse_transform(self, x):
+    def from_numpy(self, x: np.ndarray):
         """Transform X to be a SystemParameter"""
 
     def __contains__(self, value: SUPPORTED_TYPES):
@@ -73,8 +98,9 @@ class ParameterBox(ABC, Generic[SUPPORTED_TYPES]):
     def __repr__(self) -> str:
         properties = ", ".join(
             [
-                str(self.lower_bound),
-                str(self.upper_bound),
+                f"lower_bound:{str(self.lower_bound)}",
+                f"upper_bound:{str(self.upper_bound)}",
+                f"value: {str(self.value)}",
             ]
         )
         return f"{type(self)}:({properties})"
@@ -85,6 +111,7 @@ class ParameterBox(ABC, Generic[SUPPORTED_TYPES]):
                 f"{type(self)}: "
                 f"lower_bound: {self.lower_bound},"
                 f"upper_bound:{self.upper_bound},"
+                f"stored_value:{self.value}"
             ]
         )
 
