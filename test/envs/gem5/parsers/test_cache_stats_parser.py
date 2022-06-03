@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
+from test.core import TestInput
 
-from core import TestInput
 from parameterized import parameterized
 
 from sysgym.envs.gem5.parsers import parse_cache_stats_file

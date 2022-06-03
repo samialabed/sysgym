@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools<48", "wheel", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.format]
+max-line-length = "88"
+disable = [
+    "C0114", "C0115", "C0116", # missing docstrings
+    "W1514", # unspecified encoding when open
+    "R0902", "R0903", # TOO many/few instance variable - we rely on dataclass a lot for param space
+    "C0103"
+]

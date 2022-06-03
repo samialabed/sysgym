@@ -22,44 +22,43 @@ class ParamsSpace(Mapping):
 
     def __post_init__(self):
         # TODO(global context): add check here to only evaluate paramspace when debug on
-        all_params = fields(self)
-        for f in all_params:
+        for field in fields(self):
             # Ensure all members subclass ParamBox
             assert issubclass(
-                f.type, ParamBox
-            ), f" {f.name} does not subclass ParamBox."
+                field.type, ParamBox
+            ), f"{field.name} does not subclass ParamBox."
 
     def parameters(self) -> List[ParameterInfo]:
         params = []
-        for f in fields(self):
-            param_name = f.name
+        for field in fields(self):
+            param_name = field.name
             param_box: ParamBox = getattr(self, param_name)
             params.append(ParameterInfo(name=param_name, box=param_box))
         return params
 
-    def sample(self, num: int = 1, seed: np.random.RandomState = None) -> np.ndarray:
+    def sample(self, num: int = 1, seed: int = None) -> np.ndarray:
         """Sample all parameters within their bounds."""
         vals = []
-        for f in fields(self):
-            field_val: ParamBox = getattr(self, f.name)
+        for field in fields(self):
+            field_val: ParamBox = getattr(self, field.name)
             vals.append(field_val.sample(num=num, seed=seed))
         return np.array(vals)
 
     def to_latex(self) -> np.ndarray:
         """Return a np.ndarray containing tuples of lower and upper bounds."""
         bounds: List[List[str, int, int]] = []  # list of lower, upper bounds
-        for f in fields(self):
-            param_space: ParamBox = getattr(self, f.name)
+        for field in fields(self):
+            param_space: ParamBox = getattr(self, field.name)
             lower, upper = param_space.scaled_bounds
-            param_name = f.name
+            param_name = field.name
             bounds.append([param_name, lower, upper])
         return np.array(bounds)
 
     def bounds(self, use_formula: bool = False) -> np.ndarray:
         """Return a ndarray containing tuples of lower and upper bounds."""
         bounds: List[Tuple[int, int]] = []  # list of lower, upper bounds
-        for f in fields(self):
-            param_space: ParamBox = getattr(self, f.name)
+        for field in fields(self):
+            param_space: ParamBox = getattr(self, field.name)
             if use_formula:
                 param_bounds = param_space.scaled_bounds
             else:
@@ -70,10 +69,10 @@ class ParamsSpace(Mapping):
     def dict_to_numpy(self, params: Dict[str, any]) -> np.ndarray:
         """Transform potential system configuration to numpy."""
         res = []
-        for f in fields(self):
-            key = f.name
-            param_val = params[key]
-            param_space: ParamBox = getattr(self, key)
+        for field in fields(self):
+            param_name = field.name
+            param_val = params[param_name]
+            param_space: ParamBox = getattr(self, param_name)
             res.append(param_space.transform(param_val))
         return np.array(res)
 
@@ -81,9 +80,9 @@ class ParamsSpace(Mapping):
         """Transform potential X to dictionary system compatible."""
         values = values.squeeze().tolist()
         res = {}
-        for (f, x) in zip(fields(self), values):
-            param_space: ParamBox = getattr(self, f.name)
-            res[f.name] = param_space.from_numpy(x)
+        for (field, numpy_values) in zip(fields(self), values):
+            param_space: ParamBox = getattr(self, field.name)
+            res[field.name] = param_space.from_numpy(numpy_values)
         return res
 
     @staticmethod
@@ -97,11 +96,11 @@ class ParamsSpace(Mapping):
 
     def number_of_choices(self) -> int:
         search_sizes = []
-        for f in fields(self):
-            field_val: ParamBox = getattr(self, f.name)
-            print(f"{f.name}: Search size is: {field_val.search_space()}")
+        for field in fields(self):
+            field_val: ParamBox = getattr(self, field.name)
+            print(f"{field.name}: Search size is: {field_val.search_space()}")
             print(
-                f"{f.name}: Search space is: "
+                f"{field.name}: Search space is: "
                 f"{np.arange(field_val.lower_bound, field_val.upper_bound+1)}"
             )
             search_sizes.append(field_val.search_space())

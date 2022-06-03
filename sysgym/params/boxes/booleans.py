@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+from numpy.random import RandomState
 
 from sysgym.params.boxes.box import ParamBox
 
@@ -12,8 +13,7 @@ class BooleanBox(ParamBox[bool]):
     def sample(self, num: int = 1, seed: int = None) -> np.ndarray:
         assert num > 0
         if seed:
-            seeded = np.random.RandomState(seed)
-            return seeded.choice([True, False], num, replace=True)
+            return RandomState(seed).choice([True, False], num, replace=True)
         return np.random.choice([True, False], num, replace=True)
 
     def dict_repr(self) -> Dict[str, Union[str, List[bool]]]:

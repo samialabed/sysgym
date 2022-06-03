@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+from numpy.random import RandomState
 from sklearn.preprocessing import LabelEncoder
 
 from sysgym.params.boxes.box import ParamBox
@@ -29,7 +30,7 @@ class CategoricalBox(ParamBox[str]):
     def sample(self, num=1, seed: int = None) -> np.ndarray:
         assert num > 0
         if seed:
-            seeded = np.random.RandomState(seed)
+            seeded = RandomState(seed)
             samples = seeded.randint(self.lower_bound, self.upper_bound + 1, num)
         else:
             samples = np.random.randint(self.lower_bound, self.upper_bound + 1, num)

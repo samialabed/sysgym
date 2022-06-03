@@ -27,8 +27,8 @@ class Gem5DetailedStats:
 
     def __add__(self, other: "Gem5DetailedStats"):
         res = {}
-        for f in dataclasses.fields(self):
-            field_name = f.name
+        for field in dataclasses.fields(self):
+            field_name = field.name
             res[field_name] = getattr(self, field_name) + getattr(other, field_name)
 
         return Gem5DetailedStats(**res)

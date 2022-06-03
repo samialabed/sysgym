@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
+from test.core import TestInput
 from typing import Dict
 
 import numpy as np
-from core import TestInput
 from parameterized import parameterized
 
 from sysgym.envs.gem5.parsers import parse_statistics

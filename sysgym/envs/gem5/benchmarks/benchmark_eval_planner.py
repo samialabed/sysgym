@@ -6,9 +6,8 @@ from sysgym.param_dict import EnvParamsDict
 
 
 def from_env_params_to_sys(env_params: EnvParamsDict) -> List[str]:
-    # TODO: workaround dependency until we do a refactor for hierarchcail parameter
+    # TODO: workaround dependency until we do a refactor for hierarchical parameter
     opts = []
-
     for (param_name, val) in env_params.items():
         if param_name == "cache_size":
             # Cache_size has to be x * cache_line_sz * cache_assoc
@@ -38,7 +37,9 @@ def generate_benchmark_eval_template(
     # ensure every configuration on its own line
     evaluation_configs = "\n".join(evaluation_configs)
 
-    with open(bench_cfg.resource_path / "benchmark_template.xe") as bench_template_f:
+    with open(
+        bench_cfg.resource_path / "benchmark_template.xe", "r"
+    ) as bench_template_f:
         benchmark_template = Template(bench_template_f.read())
 
     benchmark_template_filled = benchmark_template.substitute(

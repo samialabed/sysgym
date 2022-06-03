@@ -26,8 +26,8 @@ class EnvParamsDict(MutableMapping):
     def update_from_numpy(self, values: np.ndarray) -> None:
         """Create EnvParams values from numpy."""
         values = values.squeeze().tolist()
-        for (param, x) in zip(self._container, values):
-            self._container[param].from_numpy(x)
+        for (param, numpy_val) in zip(self._container, values):
+            self._container[param].from_numpy(numpy_val)
 
     def reset(self) -> None:
         """Reset all values held in this container to default"""
@@ -43,23 +43,23 @@ class EnvParamsDict(MutableMapping):
         """Set a parameter to the value specified."""
         try:
             self._container[k].value = v
-        except KeyError:
-            raise KeyError(f"{k} is not a parameter in {list(self)}")
+        except KeyError as exc:
+            raise KeyError(f"{k} is not a parameter in {list(self)}") from exc
 
     def __delitem__(self, k: str) -> None:
         """Reset a value to its default."""
         try:
             parameter = self._container[k]
             parameter.reset()
-        except KeyError:
-            raise KeyError(f"{k} is not a parameter in {list(self)}")
+        except KeyError as exc:
+            raise KeyError(f"{k} is not a parameter in {list(self)}") from exc
 
     def __getitem__(self, k: str) -> any:
         """Retrieve the stored value in the parameter box."""
         try:
             return self._container[k].value
-        except KeyError:
-            raise KeyError(f"{k} is not a parameter in {list(self)}")
+        except KeyError as exc:
+            raise KeyError(f"{k} is not a parameter in {list(self)}") from exc
 
     def __len__(self) -> int:
         """Number of dimensions/parameters in this container."""

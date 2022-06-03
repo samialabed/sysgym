@@ -1,6 +1,6 @@
 import unittest
+from test.core import TestInput
 
-from core import TestInput
 from parameterized import parameterized
 
 from sysgym.params.boxes import DiscreteBox

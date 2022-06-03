@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.random import RandomState
 
 from sysgym.params.boxes.box import ParamBox
 
@@ -7,7 +8,7 @@ class ContinuousBox(ParamBox[float]):
     def sample(self, num=1, seed: int = None) -> np.ndarray:
         assert num > 0
         if seed:
-            seeded = np.random.RandomState(seed)
+            seeded = RandomState(seed)
             return seeded.uniform(self.lower_bound, self.upper_bound, num)
         return np.random.uniform(self.lower_bound, self.upper_bound, num)
 

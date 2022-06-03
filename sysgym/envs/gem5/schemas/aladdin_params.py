@@ -5,8 +5,8 @@ from sysgym.params.boxes import DiscreteBox
 from sysgym.params.param_space import ParamsSpace
 
 
-def power_of_two(x: int) -> int:
-    return 2**x
+def power_of_two(power: int) -> int:
+    return 2**power
 
 
 @dataclass(init=False, frozen=True)

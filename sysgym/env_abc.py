@@ -38,8 +38,7 @@ class Environment(ABC):
 
     @abstractmethod
     def run(self, params: EnvParamsDict) -> EnvMetrics:
-        """Execute"""
-        pass
+        """Run the environment using the provided parameters."""
 
     def __call__(self, *args, **kwargs):
         return self.run(*args, **kwargs)

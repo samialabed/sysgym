@@ -1,6 +1,7 @@
 from typing import Callable
 
 import numpy as np
+from numpy.random import RandomState
 
 from sysgym.params.boxes.box import ParamBox
 
@@ -31,7 +32,7 @@ class DiscreteBox(ParamBox[int]):
         lb = round(self.lower_bound)
         ub = round(self.upper_bound)
         if seed:
-            return np.random.RandomState(seed).randint(lb, ub + 1, num)
+            return RandomState(seed).randint(lb, ub + 1, num)
         return np.random.randint(lb, ub + 1, num)
 
     def transform(self, x: int) -> float:

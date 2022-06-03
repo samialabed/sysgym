@@ -14,13 +14,22 @@ from sysgym.envs.gem5.benchmarks.benchmark_eval_planner import (
     generate_benchmark_eval_template,
 )
 from sysgym.envs.gem5.benchmarks.benchmark_settings import Gem5BenchmarkConfig
-from sysgym.envs.gem5.benchmarks.benchmark_tasks_timeout import TASK_TO_TIMEOUT_SECONDS
+from sysgym.envs.gem5.benchmarks.benchmark_tasks_timeout import gem5_task_timeout
 from sysgym.envs.gem5.benchmarks.exception import DockerExecutionException
 from sysgym.envs.gem5.env_measure import Gem5Metrics
 from sysgym.envs.gem5.parsers import parse_statistics, parse_summary_file
 from sysgym.param_dict import EnvParamsDict
 
 LOG = logging.getLogger("sysgym")
+FILES_TO_CAPTURE = [
+    # name of files to copy from the docker volume that contains benchmark info
+    "stderr",
+    "stdout",
+    "stats.txt",
+    "*_cache_stats.txt",
+    "*_spad_stats.txt",
+    "*_summary",
+]
 
 
 @dataclass
@@ -42,29 +51,15 @@ class Gem5BenchmarkDocker:
         self._container_settings = container_settings
         self._bench_cfg = bench_cfg
         self._output_dir = output_dir
-        task_name = str(bench_cfg.task)
-        # name of files to copy from the docker volume that contains benchmark info
-        self.files_to_capture = [
-            "stderr",
-            "stdout",
-            "stats.txt",
-            f"{task_name}_cache_stats.txt",
-            f"{task_name}_spad_stats.txt",
-            f"{task_name}_summary",
-        ]
         self._docker_cli = docker.from_env()
-        if self._bench_cfg.timeout_override:
-            task_timeout_secs = self._bench_cfg.timeout_override
-        else:
-            task_timeout_secs = TASK_TO_TIMEOUT_SECONDS.get(self._bench_cfg.task, None)
-            if task_timeout_secs is None:
-                LOG.warning(
-                    "No specific timeout provided for task %s. Defaulting to 15 mins.",
-                    self._bench_cfg.task,
-                )
-                # Default to 15 minute timeout if no task specific timeout provided
-                task_timeout_secs = 15 * 60
-        self._exec_benchmark = timeout(seconds=task_timeout_secs)(self._exec_benchmark)
+
+        # Configure the evaluation time out
+        task_timeout_secs = gem5_task_timeout(
+            task=self._bench_cfg.task, timeout_override=self._bench_cfg.timeout_override
+        )
+        self._exec_benchmark_timeout = timeout(seconds=task_timeout_secs)(
+            self._exec_benchmark
+        )
 
         self._gem5_container: Optional[Container] = None
         self._compiled_sim_path = (
@@ -146,7 +141,7 @@ class Gem5BenchmarkDocker:
                 f"{self._compiled_sim_path}/{self._bench_cfg.task}/0"
             )
 
-            self._exec_benchmark(
+            self._exec_benchmark_timeout(
                 benchmark_dir_in_container=benchmark_dir_in_container,
                 benchmark_eval_plan=benchmark_eval_plan,
             )
@@ -160,11 +155,12 @@ class Gem5BenchmarkDocker:
             return Gem5Metrics(
                 summary_stats=summary_stats, detailed_stats=detailed_stats
             )
-        except TimeoutError as te:
-            LOG.error("Executing the benchmark failed. %s", te)
-        except Exception as e:
-            LOG.error("Docker execution failed: %s", e)
-            raise e
+        except TimeoutError as timeout_err:
+            LOG.error("The benchmark timed-out. %s", timeout_err)
+            raise timeout_err
+        except Exception as exc:
+            LOG.error("Docker execution failed: %s", exc)
+            raise exc
 
     def _exec_benchmark(
         self, benchmark_dir_in_container: str, benchmark_eval_plan: str
@@ -190,7 +186,7 @@ class Gem5BenchmarkDocker:
 
     def grab_env_output(self, benchmark_dir_in_container: str) -> None:
         # capture the statistics files from the container
-        for file_name in self.files_to_capture:
+        for file_name in FILES_TO_CAPTURE:
             file_content = self._gem5_container.exec_run(
                 workdir=benchmark_dir_in_container,
                 cmd=["bash", "-c", f"cat outputs/{file_name}"],
@@ -223,9 +219,9 @@ class Gem5BenchmarkDocker:
             if reuse:
                 LOG.debug("Reusing container.")
                 return container
-            else:
-                # perform cleanup and initialize again
-                self.cleanup(container)
+
+            # perform cleanup and initialize again
+            self.cleanup(container)
         except NotFound:
             container = self._create_container_w_persistent_volume(container_name)
             return container
@@ -268,8 +264,8 @@ class Gem5BenchmarkDocker:
         try:
             self._docker_cli.volumes.get(volume_name)
             return True
-        except NotFound as e:
-            LOG.debug("%s volume not found. API NotFound trace: %s.", volume_name, e)
+        except NotFound as exc:
+            LOG.debug("%s volume not found. API NotFound trace: %s.", volume_name, exc)
             return False
 
     def __enter__(self):

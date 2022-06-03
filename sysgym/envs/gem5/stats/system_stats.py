@@ -32,15 +32,15 @@ class Gem5SystemStats:
     @staticmethod
     def from_dict(res: Dict[str, any]) -> "Gem5SystemStats":
         stats_input = {}
-        for f in dataclasses.fields(Gem5SystemStats):
-            stats_input[f.name] = f.type(res[f.name])
+        for field in dataclasses.fields(Gem5SystemStats):
+            stats_input[field.name] = field.type(res[field.name])
         stats = Gem5SystemStats(**stats_input)
         return stats
 
     def __add__(self, other: "Gem5SystemStats"):
         res = {}
-        for f in dataclasses.fields(self):
-            field_name = f.name
+        for field in dataclasses.fields(self):
+            field_name = field.name
             if field_name == "final_tick":
                 res[field_name] = max(
                     getattr(self, field_name), getattr(other, field_name)
