@@ -2,24 +2,14 @@
 A suite of real-world systems and interface to compare iterative optimization algorithms.
 
 
+## Installation
 
+SysGym relies on using [Docker](https://docs.docker.com/) to simplify executing a wide variety of real-world environments and benchmarks. Follow the [official Docker's documentation](https://docs.docker.com/get-docker/) to install it.
 
+Once docker is installed you can either run `python setup.py all` to install all environments and their dependencies, or `pip install[name_of_env]` for example `pip install [postgres]` to install 
 
-## Supported environments
-
-
-
-- [x] gem5-Aladdin: [System Documentation](https://github.com/harvard-acc/gem5-aladdin), SysGYM documentation
-
-- [ ] PostgresSQL
-
-- [ ] RocksDB
-
-- [ ] Apache Flink
-
-
-Feel free to contribute your own environment, please check `CONTRIBUTION` as well as [Instruction on adding new environment](sysgym/envs/instruction.md).
-
+Once installed, you will need to configure the docker instance, e.g., pulling the right image and setup the dev workspace, we provide convienent scripts for  you to run. For example to prepare gem5-Aladdin you would run [`sh scripts/gem5_dockersetup/aladdin_setup.sh`](scripts/gem5_dockersetup/aladdin_setup.sh).
+Other scripts available in the [`scripts`](scripts) directory
 
 ## Quick start
 
@@ -56,9 +46,21 @@ You can optimize multiple objectives using only the following:
 * [BoGraph](https://github.com/samialabed/bograph) (supports sysgym out othe box) 
 * [BoTorch-sysgym](https://github.com/samialabed/sysgym-botorch)
 
-## Setup 
 
-Each environment has its own setup requirement, you can either install environment using script `install_all.sh` or a specific environment as found in the scripts directory.
+## Supported environments
+
+
+
+- [x] gem5-Aladdin: [System Documentation](https://github.com/harvard-acc/gem5-aladdin), SysGYM documentation
+
+- [ ] PostgresSQL
+
+- [ ] RocksDB
+
+- [ ] Apache Flink
+
+
+Feel free to contribute your own environment, please check [CONTRIBUTION](CONTRIBUTION.md) as well as [Instruction on adding new environment](sysgym/envs/instruction.md).
 
 
 ## Towards V1 release

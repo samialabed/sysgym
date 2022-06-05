@@ -1,0 +1,4 @@
+[MASTER]
+#C0113-16: Docstrings, R0902-3 too many/few parameters
+disable=C0103,C0114, C0115, C0116, R0902, R0903
+max-line-length=88

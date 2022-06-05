@@ -1,0 +1,12 @@
+numpy # Used to sample from the parameter space
+sklearn # Used to encode informations about the parameter space
+pandas # Used to parse the csv results from the parsers
+# Reading and writing dataclasses to/from file
+dataclasses
+dataclasses-json
+dataclass-csv
+dacite
+# retries and timeout
+tenacity
+timeout-decorator
+docker # TODO: once provided a native compiled solution to all the envionrment makes this optional
