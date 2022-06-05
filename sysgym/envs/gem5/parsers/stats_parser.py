@@ -8,7 +8,7 @@ from sysgym.envs.gem5.stats import Gem5DetailedStats, Gem5SystemStats
 
 def parse_statistics(stats_fp: Path) -> Gem5DetailedStats:
     # Parses specifically stats.txt
-    with open(stats_fp, "r") as file:
+    with open(stats_fp, "r", encoding="utf-8") as file:
         contents = file.read()
 
     # simulation dumps data periodically or when it reset,

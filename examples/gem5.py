@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # you can define your own parameter space, or use one of the pre-defined one
 param_space = AladdinSweeper20Params()
-# Cutsomizable execution: you can customize the benchmark to your need
+# Customizable execution: you can customize the benchmark to your need
 docker_container_cfg = aladdin_docker_settings()
 benchmark_cfg = Gem5BenchmarkConfig(
     source_dir=docker_container_cfg.gem_workspace_dir,
@@ -28,7 +28,7 @@ benchmark_cfg = Gem5BenchmarkConfig(
     simulator=Simulators.CPU,
     memory_type=MemoryType.CACHE,
 )
-# Define execution plan: how many time to retry at failures, the benchmark to use, etc..
+# Define execution plan: how many times to retry at failures, the benchmark to use, etc.
 cfg = Gem5EnvConfig(
     container_settings=docker_container_cfg,
     bench_cfg=benchmark_cfg,

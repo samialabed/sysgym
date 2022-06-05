@@ -176,9 +176,11 @@ class Gem5BenchmarkDocker:
                 workdir=benchmark_dir_in_container,
                 cmd=["bash", "-c", "cat outputs/stderr"],
             )
-            with open(self._output_dir / "stderr", "wb") as outf:
+            with open(self._output_dir / "stderr", "wb", encoding="utf-8") as outf:
                 outf.write(file_content.output)
-            with open(self._output_dir / "execution_plan", "w") as outf:
+            with open(
+                self._output_dir / "execution_plan", "w", encoding="utf-8"
+            ) as outf:
                 outf.writelines(benchmark_eval_plan)
             raise DockerExecutionException(
                 f"Docker exec failed with error: {status.output}"

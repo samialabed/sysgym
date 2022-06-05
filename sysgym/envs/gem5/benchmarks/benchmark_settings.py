@@ -89,8 +89,7 @@ class Gem5BenchmarkConfig:
             path_to_constants = self.resource_path / f"{self.bench_suite}_constants.xe"
             if path_to_constants.is_file():
                 LOG.info("Constants override detected, reading them.")
-                with open(path_to_constants) as constants_file:
-                    # TODO(post paper): Add tests for the regex
+                with open(path_to_constants, encoding="utf-8") as constants_file:
                     constants_vals = constants_file.read()
                 task_pattern = re.compile(rf"set \w* for \S*{self.task}\S* .*")
                 self.task_constants = "\n".join(task_pattern.findall(constants_vals))

@@ -9,7 +9,7 @@ def parse_summary_file(summary_file_path: Path) -> SummaryStats:
     """Parse a summary file contents and output a SummaryStats"""
     # Parses specifically _summary_stats.txt
 
-    with open(summary_file_path) as file:
+    with open(summary_file_path, encoding="utf-8") as file:
         summary_file_contents = file.readlines()
     parsed_results = {}
     for line in summary_file_contents:

@@ -7,7 +7,7 @@ from sysgym.envs.gem5.stats import CacheStats
 def parse_cache_stats_file(cache_stats_fp: Path) -> CacheStats:
     """Parse a summary file contents and output a SummaryStats."""
     # Parses specifically _cache_stats.txt
-    with open(cache_stats_fp) as file:
+    with open(cache_stats_fp, encoding="utf-8") as file:
         contents = file.read()
     matched_res = CACHE_STATS_PARSER.findall(contents)
     parsed_results = {_clean_key(k): float(v) for k, v in matched_res}

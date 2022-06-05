@@ -38,7 +38,7 @@ def generate_benchmark_eval_template(
     evaluation_configs = "\n".join(evaluation_configs)
 
     with open(
-        bench_cfg.resource_path / "benchmark_template.xe", "r"
+        bench_cfg.resource_path / "benchmark_template.xe", "r", encoding="utf-8"
     ) as bench_template_f:
         benchmark_template = Template(bench_template_f.read())
 
