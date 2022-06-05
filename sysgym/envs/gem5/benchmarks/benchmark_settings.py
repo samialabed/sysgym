@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from dataclasses_json import dataclass_json
 
+from sysgym.env_abc import BenchmarkConfig
 from sysgym.envs.gem5.benchmarks.benchmark_tasks import BenchmarkTask
 from sysgym.utils.enum import ListableEnum
 
@@ -53,7 +54,7 @@ class GenerationCommand(ListableEnum):
 
 @dataclass_json
 @dataclass
-class Gem5BenchmarkConfig:
+class Gem5BenchmarkConfig(BenchmarkConfig):
     # Path to the source directory of the benchmark_container suite being swept.
     # Make sure the source directory isn't a relative path, it breaks so many things
     source_dir: str
@@ -95,3 +96,7 @@ class Gem5BenchmarkConfig:
                 self.task_constants = "\n".join(task_pattern.findall(constants_vals))
             else:
                 LOG.info("No constant overrides")
+
+    @property
+    def name(self) -> str:
+        return str(self.task)

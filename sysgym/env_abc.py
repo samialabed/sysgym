@@ -8,6 +8,14 @@ from dataclasses_json import dataclass_json
 from sysgym.param_dict import EnvParamsDict
 
 
+class BenchmarkConfig(ABC):
+    # TODO: this placeholder until we refactor the benchmark out of the env cfg
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Name of the benchmark being executed."""
+
+
 @dataclass_json
 @dataclass(frozen=True)
 class EnvMetrics(ABC):
