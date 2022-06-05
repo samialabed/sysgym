@@ -16,14 +16,29 @@ Other scripts available in the [`scripts`](scripts) directory
 ### Run a single optimization loop of a given environment 
 
 ```Python
-
-#TODO: API demo showing a single iterative loop 
-
-```
-
-### Run several benchmark against a specific environment 
-```Python
-#TODO: show the environment runner script
+class SweepCacheBandwidth(ParamsSpace):
+    # you can define as many parameters you want to optimize
+    cache_bandwidth: DiscreteBox = DiscreteBox(lower_bound=2,
+                                               upper_bound=18,
+                                               default=4)
+# Create the env
+env = Gem5(env_cfg=get_gem5_configurations())
+# Create a dictionary helper that can translate from system 
+# specifications to numpy values (check EnvParamsDict API doc)
+params_dict = EnvParamsDict(param_space=param_space)
+# Your optimization loop
+for i in range(20): 
+    # update the parameters of the env and run it
+    # this would be the values proposed by your optimizer
+    params_dict["cache_bandwidth"] = i
+    # run the system with default param space values
+    env_measures = env.run(params=params_dict)
+    # obser the env_measures
+    print(env_measures)  
+    # this would be what your optimizer want to observe
+    # Run and observe the results
+    env_measures = env.run(params_dict)
+    print(env_measures)
 ```
 
 
@@ -51,7 +66,7 @@ You can optimize multiple objectives using only the following:
 
 
 
-- [x] gem5-Aladdin: [System Documentation](https://github.com/harvard-acc/gem5-aladdin), SysGYM documentation
+- [x] gem5-Aladdin: [System Documentation](https://github.com/harvard-acc/gem5-aladdin), [SysGYM documentation](sysgym/envs/gem5/README.md)
 
 - [ ] PostgresSQL
 
@@ -61,14 +76,6 @@ You can optimize multiple objectives using only the following:
 
 
 Feel free to contribute your own environment, please check [CONTRIBUTION](CONTRIBUTION.md) as well as [Instruction on adding new environment](sysgym/envs/instruction.md).
-
-
-## Towards V1 release
-As we are still in v0.1 expect the API to change overtime as we simplify the process of using it, the primary goal of V1 release are:
-- [ ]Simplify the process of importing the desirable API: which means creating hooks to perform the installation at import time rather than requiring the user to manually run scripts.
-- [ ] improving the space abstraction to allow incorporating hierarchical dependencies between the parameters. 
-
-## Citation
 
 
 
