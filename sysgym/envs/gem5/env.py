@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -11,12 +12,12 @@ LOG = logging.getLogger("sysgym")
 
 
 class Gem5(Environment):
-    def __init__(self, env_cfg: Gem5EnvConfig):
-        super().__init__(env_cfg)
+    def __init__(self, env_cfg: Gem5EnvConfig, artifacts_output_dir: Path):
+        super().__init__(env_cfg=env_cfg, artifacts_output_dir=artifacts_output_dir)
         self.benchmark_container = Gem5BenchmarkDocker(
             bench_cfg=env_cfg.bench_cfg,
             container_settings=env_cfg.container_settings,
-            output_dir=env_cfg.artifacts_output_dir,
+            output_dir=artifacts_output_dir,
         )
         self.run = retry(
             stop=stop_after_attempt(env_cfg.retry_attempt),

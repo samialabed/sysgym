@@ -33,10 +33,9 @@ cfg = Gem5EnvConfig(
     container_settings=docker_container_cfg,
     bench_cfg=benchmark_cfg,
     retry_attempt=1,
-    artifacts_output_dir=Path("/tmp/gem5/"),
 )
 # Create the env
-env = Gem5(env_cfg=cfg)
+env = Gem5(env_cfg=cfg, artifacts_output_dir=Path("/tmp/gem5/"))
 params_dict = EnvParamsDict(param_space=param_space)
 # run the system with default param space values
 env_measures = env.run(params=params_dict)

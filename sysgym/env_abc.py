@@ -19,22 +19,26 @@ class EnvMetrics(ABC):
 @dataclass_json
 @dataclass(frozen=True)
 class EnvConfig(ABC):
-    artifacts_output_dir: Path  # directory storing the system artifacts and metrics
-
     @property
     @abstractmethod
     def name(self) -> str:
         """Name of the environment"""
 
-    def __post_init__(self):
-        self.artifacts_output_dir.mkdir(parents=True, exist_ok=True)
-
 
 class Environment(ABC):
-    """Environment to optimize"""
+    """Environment runner"""
 
-    def __init__(self, env_cfg: EnvConfig):
+    def __init__(self, env_cfg: EnvConfig, artifacts_output_dir: Path):
+        """
+
+
+        :param env_cfg:
+        :param artifacts_output_dir: directory storing the system artifacts and metrics
+
+        """
         self.env_cfg = env_cfg
+        self.artifacts_output_dir = artifacts_output_dir
+        self.artifacts_output_dir.mkdir(parents=True, exist_ok=True)
 
     @abstractmethod
     def run(self, params: EnvParamsDict) -> EnvMetrics:
