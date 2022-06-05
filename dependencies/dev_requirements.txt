@@ -1,0 +1,2 @@
+setuptools # package management
+parameterized # allows parameterization of tests and create test groups.
