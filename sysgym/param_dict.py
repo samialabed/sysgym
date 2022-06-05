@@ -71,3 +71,6 @@ class EnvParamsDict(MutableMapping):
 
     def __repr__(self):
         return repr(self._container)
+
+    def __str__(self):
+        return ", ".join([f"{p_name}:{p_value}" for (p_name, p_value) in self.items()])
