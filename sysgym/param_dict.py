@@ -27,7 +27,7 @@ class EnvParamsDict(MutableMapping):
         """Create EnvParams values from numpy."""
         values = values.squeeze().tolist()
         for (param, numpy_val) in zip(self._container, values):
-            self._container[param].from_numpy(numpy_val)
+            self._container[param].value = self._container[param].from_numpy(numpy_val)
 
     def reset(self) -> None:
         """Reset all values held in this container to default"""

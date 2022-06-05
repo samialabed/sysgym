@@ -23,7 +23,7 @@ class EnvConfig(ABC):
 
     @property
     @abstractmethod
-    def name(self):
+    def name(self) -> str:
         """Name of the environment"""
 
     def __post_init__(self):
