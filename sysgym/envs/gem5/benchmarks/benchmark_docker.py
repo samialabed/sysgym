@@ -147,9 +147,7 @@ class Gem5BenchmarkDocker:
             )
             self.grab_env_output(benchmark_dir_in_container=benchmark_dir_in_container)
 
-            summary_stats = parse_summary_file(
-                self._output_dir / f"{self._bench_cfg.task}_summary"
-            )
+            summary_stats = parse_summary_file(self._output_dir / "summary")
             detailed_stats = parse_statistics(self._output_dir / "stats.txt")
 
             return Gem5Metrics(
@@ -197,9 +195,10 @@ class Gem5BenchmarkDocker:
                 raise DockerExecutionException(
                     f"Docker exec failed with error: {file_content.output}"
                 )
-
+            # Remove the task name from the summary file name
+            new_file_name = file_name.replace("*_", "")
             # download it into the experiment manager directory
-            with open(self._output_dir / file_name, "wb") as outf:
+            with open(self._output_dir / new_file_name, "wb") as outf:
                 outf.write(file_content.output)
 
     def _get_gem5_container(
