@@ -45,6 +45,8 @@ class EnvParamsDict(MutableMapping):
             self._container[k].value = v
         except KeyError as exc:
             raise KeyError(f"{k} is not a parameter in {list(self)}") from exc
+        except ValueError as exc:
+            raise KeyError(f"{k} is being set outside the bounds.") from exc
 
     def __delitem__(self, k: str) -> None:
         """Reset a value to its default."""

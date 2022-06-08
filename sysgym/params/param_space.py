@@ -141,7 +141,7 @@ class ParamsSpace(Mapping):
                 fields_to_keep.append((field.name, field.type, field))
 
         return make_dataclass(
-            cls_name=f"{self.__class__.__name__}Subset",
+            cls_name=f"{self.__class__.__name__}{len(params_to_keep)}ParamsSubset",
             fields=fields_to_keep,
             bases=(ParamsSpace,),
             frozen=True,

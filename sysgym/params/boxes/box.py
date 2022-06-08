@@ -33,7 +33,7 @@ class ParamBox(ABC, Generic[SUPPORTED_TYPES]):
 
     @property
     def value(self) -> SUPPORTED_TYPES:
-        """Stored value inside the box"""
+        """Stored value inside the box, scale it back when surfaced"""
         return self.formula(self._value)
 
     def reset(self):
@@ -42,6 +42,7 @@ class ParamBox(ABC, Generic[SUPPORTED_TYPES]):
 
     @value.setter
     def value(self, new_val: SUPPORTED_TYPES):
+        """(unscaled) value is used"""
         if new_val in self:  # is in the bounds
             self._value = new_val
         else:
