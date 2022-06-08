@@ -1,6 +1,6 @@
 from collections.abc import Mapping
-from dataclasses import dataclass, fields
-from typing import Dict, Iterator, List, NamedTuple, Tuple
+from dataclasses import dataclass, fields, make_dataclass
+from typing import Dict, Iterator, List, NamedTuple, Set, Tuple
 
 import numpy as np
 
@@ -78,11 +78,15 @@ class ParamsSpace(Mapping):
 
     def numpy_to_dict(self, values: np.ndarray) -> Dict[str, any]:
         """Transform potential X to dictionary system compatible."""
-        values = values.squeeze().tolist()
+        if values.shape[0] > 1:
+            values = values.squeeze()
+        else:
+            values = values.squeeze(0)
+        values = values.tolist()
         res = {}
-        for (field, numpy_values) in zip(fields(self), values):
+        for (idx, field) in enumerate(fields(self)):
             param_space: ParamBox = getattr(self, field.name)
-            res[field.name] = param_space.from_numpy(numpy_values)
+            res[field.name] = param_space.from_numpy(values[idx])
         return res
 
     @staticmethod
@@ -119,3 +123,26 @@ class ParamsSpace(Mapping):
 
     def __iter__(self) -> Iterator[Dict[str, ParamBox]]:
         return iter({f.name: getattr(self, f.name) for f in fields(self)})
+
+    def __contains__(self, param_name: str) -> bool:
+        try:
+            getattr(param_name)
+            return True
+        except AttributeError:
+            return False
+
+    def subset(self, params_to_keep: Set[str]) -> "ParamsSpace":
+        """Method to create a subset of the paramspace given the set of params to
+        keep."""
+        params_fields = fields(self)
+        fields_to_keep = []
+        for field in params_fields:
+            if field.name in params_to_keep:
+                fields_to_keep.append((field.name, field.type, field))
+
+        return make_dataclass(
+            cls_name=f"{self.__class__.__name__}Subset",
+            fields=fields_to_keep,
+            bases=(ParamsSpace,),
+            frozen=True,
+        )()
