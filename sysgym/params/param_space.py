@@ -55,7 +55,10 @@ class ParamsSpace(Mapping):
         return np.array(bounds)
 
     def bounds(self, use_formula: bool = False) -> np.ndarray:
-        """Return a ndarray containing tuples of lower and upper bounds."""
+        """Return a ndarray containing tuples of lower and upper bounds.
+        Returns shape: [d, 2] where d is the number of parameters
+
+        """
         bounds: List[Tuple[int, int]] = []  # list of lower, upper bounds
         for field in fields(self):
             param_space: ParamBox = getattr(self, field.name)
