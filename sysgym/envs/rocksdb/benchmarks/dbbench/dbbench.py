@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import subprocess
 import time
@@ -26,7 +27,6 @@ def capture_process_io(benchmark_process: Process, monitoring_interval=10) -> Sy
     cpu_usages = []
     # while the process is running calculate resource utilization.
     while benchmark_process.is_running():
-        time.sleep(monitoring_interval)
         # capture the memory and cpu_usage utilization at an instance
         mem = benchmark_process.memory_info().rss / float(2**30)
         cpu = benchmark_process.cpu_percent()
@@ -34,6 +34,7 @@ def capture_process_io(benchmark_process: Process, monitoring_interval=10) -> Sy
             break
         mem_usages.append(mem)
         cpu_usages.append(cpu)
+        time.sleep(monitoring_interval)
     benchmark_process.wait()
     duration = time.time() - experiment_start
 
@@ -79,19 +80,23 @@ class DBBench(BenchmarkConfig):
 
     def cleanup(self):
         """Remove any produced artifacts."""
-        shutil.rmtree(self._bench_plan.load_phase.db)
-        shutil.rmtree(self._bench_plan.load_phase.wal_dir)
+        if os.path.exists(self._bench_plan.load_phase.db):
+            shutil.rmtree(self._bench_plan.load_phase.db)
+        if os.path.exists(self._bench_plan.load_phase.wal_dir):
+            shutil.rmtree(self._bench_plan.load_phase.wal_dir)
 
     def execute(self, params: EnvParamsDict) -> RocksDBMeasurements:
-        if self._bench_plan.load_phase:
-            # Load phase is always standard, prepare the cache of the system
-            self._load_phase()
-        run_process = self._run_phase(params)
-        system_io = capture_process_io(run_process)
-        parsed_stats = parse_res_file(self.run_phase_results)
-        LOG.debug("%s finished in %s", self._bench_plan.name, system_io.exe_time)
-        self.cleanup()
-        return RocksDBMeasurements(sysio=system_io, bench_stats=parsed_stats)
+        try:
+            if self._bench_plan.load_phase:
+                # Load phase is always standard, prepare the cache of the system
+                self._load_phase()
+            run_process = self._run_phase(params)
+            system_io = capture_process_io(run_process)
+            parsed_stats = parse_res_file(self.run_phase_results)
+            LOG.debug("%s finished in %s", self._bench_plan.name, system_io.exe_time)
+            return RocksDBMeasurements(sysio=system_io, bench_stats=parsed_stats)
+        finally:
+            self.cleanup()
 
     def _load_phase(self):
         LOG.info("Executing the the load_phase.")
@@ -115,7 +120,6 @@ class DBBench(BenchmarkConfig):
 
     def _run_phase(self, params: EnvParamsDict):
         LOG.info("Executing the run_phase.")
-        start_time = time.time()
         rocksdb_params_options = self.env_params_dict_to_sys(params)
         run_phase = self._bench_plan.run_phase
         if isinstance(run_phase, DBBenchSettings):
@@ -126,10 +130,7 @@ class DBBench(BenchmarkConfig):
         with open(self.run_phase_results, "wb") as out, open(
             self.run_phase_errs, "wb"
         ) as err:
-            LOG.debug("run_phase cmd: %s.", run_args)
             process = psutil.Popen([self._cmd] + run_args, stdout=out, stderr=err)
-        finish_time = time.time() - start_time
-        LOG.info("Run phase took: %s seconds.", finish_time)
         return process
 
     @property

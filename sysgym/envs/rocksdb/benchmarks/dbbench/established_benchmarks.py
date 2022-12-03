@@ -234,7 +234,16 @@ FAST_ZIPPY_WORKLOAD = DBBenchPlan(
 
 TEST_WORKLOAD = DBBenchPlan(
     name="test_workload_1min",
-    load_phase=None,
+    load_phase=DBBenchSettings(
+        benchmarks=DBBenchBenchmarksOptions(fillrandom=True),
+        num=100000,
+        use_existing_db=False,
+        use_direct_io_for_flush_and_compaction=True,
+        use_direct_reads=True,
+        key_size=48,
+        cache_size=268435456,
+        value_size=43,
+    ),
     run_phase=DBBenchSettings(
         benchmarks=DBBenchBenchmarksOptions(fillrandom=True, stats=True),
         statistics=True,

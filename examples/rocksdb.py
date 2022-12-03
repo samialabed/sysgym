@@ -17,15 +17,15 @@ cfg = RocksDBEnvConfig(
     bench_cfg=benchmark_cfg,
 )
 # Create the env
-env = RocksDBEnv(env_cfg=cfg, artifacts_output_dir=Path("/tmp/rocksdb/"))
+env = RocksDBEnv(env_cfg=cfg, artifacts_output_dir=Path("/tmp/rocksdb_exp/"))
 params_dict = EnvParamsDict(param_space=param_space)
 # run the system with default param space values
 env_measures = env.run(params=params_dict)
 # obser the env_measures
-print(env_measures)  # this would be what your optimizer want to observe
+# this would be what your optimizer want to observe
+print(f"Env measurements before: {env_measures}")
 # update the parameters of the env and run it
-params_dict[
-    "max_background_compactions"
-] = 4  # this would be the values proposed by your optimizer
+# this would be the values proposed by your optimizer
+params_dict["max_background_compactions"] = 4
 env_measures = env.run(params_dict)
-print(env_measures)
+print(f"Env measurements after: {env_measures}")
