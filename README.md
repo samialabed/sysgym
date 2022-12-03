@@ -70,9 +70,7 @@ You can optimize multiple objectives using only the following:
 
 - [ ] PostgresSQL
 
-- [ ] RocksDB
-
-- [ ] Apache Flink
+- [x] RocksDB: [System Documentation](https://github.com/facebook/rocksdb), [SysGYM documentation](sysgym/envs/rocksdb/README.md)
 
 
 Feel free to contribute your own environment, please check [CONTRIBUTION](CONTRIBUTION.md) as well as [Instruction on adding new environment](sysgym/envs/instruction.md).

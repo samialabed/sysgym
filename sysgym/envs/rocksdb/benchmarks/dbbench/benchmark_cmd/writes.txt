@@ -1,0 +1,1 @@
+--benchmarks=fillrandom,stats --num=30000000 --threads=8 --writes=1000000 -max_background_compactions=16 -max_background_flushes=7 -subcompactions=4 --compression_type=lz4 -enable_pipelined_write=false --statistics=true

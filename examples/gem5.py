@@ -12,7 +12,7 @@ from sysgym.envs.gem5.benchmarks.benchmark_tasks import MachSuiteTask
 from sysgym.envs.gem5.benchmarks.pre_defained_docker_settings import (
     aladdin_docker_settings,
 )
-from sysgym.envs.gem5.schemas import AladdinSweeper20Params
+from sysgym.envs.gem5.schema import AladdinSweeper20Params
 from sysgym.param_dict import EnvParamsDict
 
 logging.basicConfig(level=logging.DEBUG)
