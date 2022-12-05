@@ -22,7 +22,7 @@ class RocksDB10Params(RocksDBParamSchema):
     # Flushing options
     # Ref https://github.com/facebook/rocksdb/wiki/RocksDB-Tuning-Guide#flushing-options
     write_buffer_size: DiscreteBox = DiscreteBox(
-        lower_bound=1, upper_bound=150000000, default=67108864
+        lower_bound=12097152, upper_bound=167772160, default=67108864
     )
     max_write_buffer_number: DiscreteBox = DiscreteBox(
         lower_bound=1, upper_bound=128, default=2
@@ -39,12 +39,12 @@ class RocksDB10Params(RocksDBParamSchema):
     )
 
     block_size: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=500000, default=4096
+        lower_bound=32, upper_bound=500000, default=4096
     )
 
     # level optimization, compactions
     level0_file_num_compaction_trigger: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=256, default=4
+        lower_bound=1, upper_bound=64, default=4
     )
 
     level0_slowdown_writes_trigger: DiscreteBox = DiscreteBox(
