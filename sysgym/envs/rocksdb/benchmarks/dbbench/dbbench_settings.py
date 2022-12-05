@@ -33,7 +33,6 @@ class DBBenchSettings(BenchmarkSettings):
     reads: int = -1  # Number of reads to do, if -1 do NUM
     use_direct_io_for_flush_and_compaction: bool = False  # Use O_DIRECT for flush&copct
     use_direct_reads: bool = False  # use O_DIRECT for reading data
-    clean_after: bool = True  # Clean the DB after executing
 
     def as_cmd(self) -> List[str]:
         out = []

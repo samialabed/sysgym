@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 # you can define your own parameter space, or use one of the pre-defined one
 param_space = RocksDB10Params()
 # You can customize your benchmark with DBBenchPlan or use predefined one
-benchmark_cfg = established_benchmarks.TEST_WORKLOAD
+benchmark_cfg = established_benchmarks.DBBenchTasks.READ_RANDOM_WRITE_RANDOM.get_plan()
 # Define execution plan: how many times to retry at failures, the benchmark to use, etc.
 cfg = RocksDBEnvConfig(
     bench_cfg=benchmark_cfg,

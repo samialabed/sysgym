@@ -52,11 +52,19 @@ class DBBenchPlan:
 class DBBench(BenchmarkConfig):
     CLEAR_LOCKS_WAIT_SEC = 10
 
-    def __init__(self, artifacts_output_dir: Path, bench_plan: DBBenchPlan):
+    def __init__(
+        self,
+        artifacts_output_dir: Path,
+        bench_plan: DBBenchPlan,
+        clean_after: bool = True,
+    ):
         self._cmd = "db_bench"
         self._bench_plan = bench_plan
         self._artifacts_output_dir = artifacts_output_dir
         self._name = f"dbbench_{bench_plan.name}"
+        # Clean the database afterward, for update/read workload this isn't needed
+        # But it is useful for any workload that inserts item in the db.
+        self._clean_after = clean_after
 
     @staticmethod
     def env_params_dict_to_sys(params: EnvParamsDict) -> List[str]:
@@ -80,16 +88,11 @@ class DBBench(BenchmarkConfig):
 
     def cleanup(self):
         """Remove any produced artifacts."""
-        if self._bench_plan.load_phase and self._bench_plan.load_phase.clean_after:
+        if self._clean_after:
             if os.path.exists(self._bench_plan.load_phase.db):
                 shutil.rmtree(self._bench_plan.load_phase.db)
             if os.path.exists(self._bench_plan.load_phase.wal_dir):
                 shutil.rmtree(self._bench_plan.load_phase.wal_dir)
-        if self._bench_plan.run_phase.clean_after:
-            if os.path.exists(self._bench_plan.run_phase.db):
-                shutil.rmtree(self._bench_plan.run_phase.db)
-            if os.path.exists(self._bench_plan.run_phase.wal_dir):
-                shutil.rmtree(self._bench_plan.run_phase.wal_dir)
 
     def execute(self, params: EnvParamsDict) -> RocksDBMeasurements:
         try:
