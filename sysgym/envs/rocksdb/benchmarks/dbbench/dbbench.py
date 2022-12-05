@@ -80,10 +80,16 @@ class DBBench(BenchmarkConfig):
 
     def cleanup(self):
         """Remove any produced artifacts."""
-        if os.path.exists(self._bench_plan.load_phase.db):
-            shutil.rmtree(self._bench_plan.load_phase.db)
-        if os.path.exists(self._bench_plan.load_phase.wal_dir):
-            shutil.rmtree(self._bench_plan.load_phase.wal_dir)
+        if self._bench_plan.load_phase and self._bench_plan.load_phase.clean_after:
+            if os.path.exists(self._bench_plan.load_phase.db):
+                shutil.rmtree(self._bench_plan.load_phase.db)
+            if os.path.exists(self._bench_plan.load_phase.wal_dir):
+                shutil.rmtree(self._bench_plan.load_phase.wal_dir)
+        if self._bench_plan.run_phase.clean_after:
+            if os.path.exists(self._bench_plan.run_phase.db):
+                shutil.rmtree(self._bench_plan.run_phase.db)
+            if os.path.exists(self._bench_plan.run_phase.wal_dir):
+                shutil.rmtree(self._bench_plan.run_phase.wal_dir)
 
     def execute(self, params: EnvParamsDict) -> RocksDBMeasurements:
         try:

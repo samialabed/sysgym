@@ -21,6 +21,7 @@ class DBBenchBenchmarksOptions(object):
     mergerandom: bool = False  # same as (update/append)random using merge operator.
     filluniquerandom: bool = False  # write N values in a random k order
     mixgraph: bool = False  # allow expressing the qps using sine wave
+    readrandomwriterandom: bool = False  # N threads doing random-read, random-write
     # statistics
     sstables: bool = False  # print sstables stats
     levelstats: bool = False  # print the number of files and bytes per level

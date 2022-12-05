@@ -10,11 +10,89 @@ from sysgym.envs.rocksdb.benchmarks.dbbench.mixgraph_opts import MixGraphDBBench
 _WORKLOAD_DIRS = Path(__file__).parent / "benchmark_cmd"
 
 
+def convert_to_sec(time_value: int, measure: str):
+    # TODO I am sure there is a real lib for this
+    sec_to_min = 60
+    min_to_hr = 60
+    if measure.lower() == "h" or measure.lower() == "hour":
+        return time_value * sec_to_min * min_to_hr
+    elif measure.lower() == "m" or measure.lower() == "minute":
+        return time_value * sec_to_min
+    else:
+        raise ValueError(f"Unrecognised measurement {measure}")
+
+
 def read_benchmark(name: str) -> str:
     with open(_WORKLOAD_DIRS / name) as f:
         contents = f.readline()
     return contents
 
+
+NO_LOAD_WORKLOADS = {
+    "fillseq": DBBenchPlan(
+        # Used in NNI to compare.
+        name="fillrandom",
+        load_phase=None,
+        run_phase=DBBenchSettings(
+            benchmarks=DBBenchBenchmarksOptions(fillrandom=True),
+            num=13107200,
+            threads=1,
+            use_existing_db=False,
+            statistics=True,
+            cache_size=17179869184,
+            benchmark_write_rate_limit=10240,
+            prefix_size=20,
+            key_size=20,
+            value_size=100,
+            keys_per_prefix=0,
+            duration=7200,
+        ),
+    ),
+    "readrandomwriterandom": DBBenchPlan(
+        name="readrandomwriterandom",
+        load_phase=None,
+        run_phase=DBBenchSettings(
+            benchmarks=DBBenchBenchmarksOptions(readrandomwriterandom=True),
+            num=13107200,
+            threads=8,
+            use_existing_db=False,
+            statistics=True,
+            cache_size=17179869184,
+            benchmark_write_rate_limit=10240,
+            key_size=16,
+            value_size=152,
+            keys_per_prefix=0,
+        ),
+    ),
+    "fb_document_store": DBBenchPlan(
+        # https://www.levyx.com/sites/default/files/white-papers/herocks_facebook_report_2018-02.pdf
+        name="fb_document_store",
+        load_phase=DBBenchSettings(
+            benchmarks=DBBenchBenchmarksOptions(filluniquerandom=True),
+            num=250000000,
+            use_existing_db=False,
+            use_direct_io_for_flush_and_compaction=True,
+            use_direct_reads=True,
+            key_size=16,
+            cache_size=2147483648,
+            value_size=152,
+            statistics=False,
+        ),
+        run_phase=DBBenchSettings(
+            benchmarks=DBBenchBenchmarksOptions(readrandomwriterandom=True),
+            num=250000000,
+            threads=16,
+            use_existing_db=False,
+            statistics=True,
+            cache_size=2147483648,
+            benchmark_write_rate_limit=10240,
+            key_size=16,
+            value_size=152,
+            keys_per_prefix=0,
+            duration=convert_to_sec(15, "m"),
+        ),
+    ),
+}
 
 """
 RocksDB InMemory workload performance benchmark_container
@@ -44,6 +122,7 @@ IN_MEMORY_WORKLOADS = {
             prefix_size=20,
             key_size=20,
             keys_per_prefix=0,
+            statistics=False,
         ),
         run_phase=DBBenchSettings(
             benchmarks=DBBenchBenchmarksOptions(readwhilewriting=True),
@@ -75,6 +154,7 @@ IN_MEMORY_WORKLOADS = {
             prefix_size=20,
             key_size=20,
             keys_per_prefix=0,
+            statistics=False,
         ),
         run_phase=DBBenchSettings(
             benchmarks=DBBenchBenchmarksOptions(readwhilewriting=True),
@@ -106,6 +186,7 @@ IN_MEMORY_WORKLOADS = {
             key_size=20,
             keys_per_prefix=10,
             cache_size=17179869184,
+            statistics=False,
         ),
         run_phase=DBBenchSettings(
             benchmarks=DBBenchBenchmarksOptions(readwhilewriting=True),
@@ -136,6 +217,7 @@ IN_MEMORY_WORKLOADS = {
             key_size=20,
             keys_per_prefix=10,
             cache_size=17179869184,
+            statistics=False,
         ),
         run_phase=DBBenchSettings(
             benchmarks=DBBenchBenchmarksOptions(readwhilewriting=True),
@@ -175,19 +257,6 @@ More information:
 """
 
 
-def convert_to_sec(time_value: int, measure: str):
-    # TODO I am sure there is a real lib for this
-    # TODO make it a regex too
-    sec_to_min = 60
-    min_to_hr = 60
-    if measure.lower() == "h" or measure.lower() == "hour":
-        return time_value * sec_to_min * min_to_hr
-    elif measure.lower() == "m" or measure.lower() == "minute":
-        return time_value * sec_to_min
-    else:
-        raise ValueError(f"Unrecognised measurement {measure}")
-
-
 FAST_ZIPPY_WORKLOAD = DBBenchPlan(
     name="zippy_workload_5min",
     load_phase=DBBenchSettings(
@@ -199,6 +268,7 @@ FAST_ZIPPY_WORKLOAD = DBBenchPlan(
         key_size=48,
         cache_size=268435456,
         value_size=43,
+        statistics=False,
     ),
     run_phase=MixGraphDBBenchOptions(
         benchmarks=DBBenchBenchmarksOptions(mixgraph=True, stats=True),
@@ -243,6 +313,7 @@ TEST_WORKLOAD = DBBenchPlan(
         key_size=48,
         cache_size=268435456,
         value_size=43,
+        statistics=False,
     ),
     run_phase=DBBenchSettings(
         benchmarks=DBBenchBenchmarksOptions(fillrandom=True, stats=True),
@@ -253,8 +324,8 @@ TEST_WORKLOAD = DBBenchPlan(
 )
 
 
-LOCAL_ZIPPY_WORKLOAD = DBBenchPlan(
-    name="zippy_workload_15min",
+ALL_RANDOM_WORKLOAD = DBBenchPlan(
+    name="all_random_workload_10min",
     load_phase=DBBenchSettings(
         benchmarks=DBBenchBenchmarksOptions(fillrandom=True),
         num=100000,
@@ -264,6 +335,7 @@ LOCAL_ZIPPY_WORKLOAD = DBBenchPlan(
         key_size=48,
         cache_size=268435456,
         value_size=43,
+        statistics=False,
     ),
     run_phase=MixGraphDBBenchOptions(
         benchmarks=DBBenchBenchmarksOptions(mixgraph=True, stats=True),
@@ -292,6 +364,51 @@ LOCAL_ZIPPY_WORKLOAD = DBBenchPlan(
         sine_d=4500000,
         perf_level=1,
         key_size=48,
-        duration=convert_to_sec(2, "m"),
+        duration=convert_to_sec(10, "m"),
+    ),
+)
+
+
+ZIPPY_WORKLOAD = DBBenchPlan(
+    name="zippy_workload_15min",
+    load_phase=DBBenchSettings(
+        benchmarks=DBBenchBenchmarksOptions(fillrandom=True),
+        num=1000000,
+        use_existing_db=False,
+        use_direct_io_for_flush_and_compaction=True,
+        use_direct_reads=True,
+        key_size=48,
+        cache_size=268435456,
+        value_size=43,
+        statistics=False,
+    ),
+    run_phase=MixGraphDBBenchOptions(
+        benchmarks=DBBenchBenchmarksOptions(mixgraph=True, stats=True),
+        cache_size=268435456,
+        num=5000000,
+        reads=42000000,
+        statistics=True,
+        use_direct_io_for_flush_and_compaction=True,
+        use_direct_reads=True,
+        use_existing_db=True,
+        keyrange_dist_a=14.18,
+        keyrange_dist_b=-2.917,
+        keyrange_dist_c=0.0164,
+        keyrange_dist_d=-0.08082,
+        keyrange_num=30,
+        value_k=0.2615,
+        value_sigma=25.45,
+        iter_k=2.517,
+        iter_sigma=14.236,
+        mix_get_ratio=0.85,
+        mix_put_ratio=0.14,
+        mix_seek_ratio=0.01,
+        sine_mix_rate_interval_milliseconds=5000,
+        sine_a=100000,
+        sine_b=0.00000073,
+        sine_d=450000,
+        perf_level=1,
+        key_size=48,
+        duration=convert_to_sec(15, "m"),
     ),
 )
