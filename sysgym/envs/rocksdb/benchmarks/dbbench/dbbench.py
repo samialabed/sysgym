@@ -89,8 +89,9 @@ class DBBench(BenchmarkConfig):
     def cleanup(self):
         """Remove any produced artifacts."""
         if self._clean_after:
-            if os.path.exists(self._bench_plan.load_phase.db):
-                shutil.rmtree(self._bench_plan.load_phase.db)
+            if self._bench_plan.load_phase:
+                if os.path.exists(self._bench_plan.load_phase.db):
+                    shutil.rmtree(self._bench_plan.load_phase.db)
             if os.path.exists(self._bench_plan.load_phase.wal_dir):
                 shutil.rmtree(self._bench_plan.load_phase.wal_dir)
 
