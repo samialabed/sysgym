@@ -92,8 +92,8 @@ class DBBench(BenchmarkConfig):
             if self._bench_plan.load_phase:
                 if os.path.exists(self._bench_plan.load_phase.db):
                     shutil.rmtree(self._bench_plan.load_phase.db)
-            if os.path.exists(self._bench_plan.load_phase.wal_dir):
-                shutil.rmtree(self._bench_plan.load_phase.wal_dir)
+                if os.path.exists(self._bench_plan.load_phase.wal_dir):
+                    shutil.rmtree(self._bench_plan.load_phase.wal_dir)
 
     def execute(self, params: EnvParamsDict) -> RocksDBMeasurements:
         try:
