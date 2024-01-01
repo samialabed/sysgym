@@ -108,7 +108,7 @@ class ParamsSpace(Mapping):
             print(f"{field.name}: Search size is: {field_val.search_space()}")
             print(
                 f"{field.name}: Search space is: "
-                f"{np.arange(field_val.lower_bound, field_val.upper_bound+1)}"
+                f"{np.arange(field_val.lower_bound, field_val.upper_bound + 1)}"
             )
             search_sizes.append(field_val.search_space())
         return np.product(search_sizes)
@@ -129,7 +129,7 @@ class ParamsSpace(Mapping):
 
     def __contains__(self, param_name: str) -> bool:
         try:
-            getattr(param_name)
+            getattr(self, param_name)
             return True
         except AttributeError:
             return False

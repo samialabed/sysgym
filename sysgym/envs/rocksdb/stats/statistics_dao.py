@@ -22,3 +22,9 @@ class MicroStats(Statistics):
     p100: float
     count: int
     sum: float
+
+    @property
+    def mean(self) -> float:
+        if self.count == 0:
+            return 0
+        return self.sum / self.count

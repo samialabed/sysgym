@@ -128,7 +128,6 @@ class CompactionIOStats(CompactionStatsBase):
         "read_throughput",
         "time_sec",
     ]
-
     write_size_mb: float
     write_throughput: float
     read_size_mb: float

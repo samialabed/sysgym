@@ -15,6 +15,7 @@ class RocksDB10Params(RocksDBParamSchema):
         lower_bound=1, upper_bound=256, default=1
     )
 
+    # TODO(mixed optimization): Small discrete values should use optimize_discrete
     # max num concurrent bg compaction in parallel
     max_background_flushes: DiscreteBox = DiscreteBox(
         lower_bound=1, upper_bound=10, default=1
