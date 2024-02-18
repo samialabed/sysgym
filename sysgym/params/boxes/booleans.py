@@ -25,6 +25,6 @@ class BooleanBox(ParamBox[bool]):
         """Return 0 for False and 1 for True."""
         return float(x)
 
-    def from_numpy(self, x: float) -> bool:
+    def from_numpy(self, x: np.ndarray) -> bool:
         """Assign True to floats over 0.5"""
-        return x > 0.5
+        return float(x) > 0.5

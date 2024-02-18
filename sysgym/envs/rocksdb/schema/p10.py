@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from sysgym.envs.rocksdb.schema.schema import RocksDBParamSchema
-from sysgym.params.boxes import ContinuousBox, DiscreteBox
+from sysgym.params.boxes import DiscreteBox
 
 
 @dataclass(init=False, frozen=True)
@@ -35,8 +35,8 @@ class RocksDB10Params(RocksDBParamSchema):
     )
 
     # space params, tuning space
-    max_bytes_for_level_multiplier: ContinuousBox = ContinuousBox(
-        lower_bound=5, upper_bound=15, default=10
+    max_bytes_for_level_multiplier: DiscreteBox = DiscreteBox(
+        lower_bound=5, upper_bound=20, default=10
     )
 
     block_size: DiscreteBox = DiscreteBox(

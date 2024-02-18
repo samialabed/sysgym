@@ -15,8 +15,8 @@ class ContinuousBox(ParamBox[float]):
     def transform(self, x: float) -> float:
         return x
 
-    def from_numpy(self, x: float) -> float:
-        return x
+    def from_numpy(self, x: np.ndarray) -> float:
+        return float(x)
 
     def __contains__(self, value: float):
         """Check if value in bounds."""

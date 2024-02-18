@@ -38,6 +38,6 @@ class DiscreteBox(ParamBox[int]):
     def transform(self, x: int) -> float:
         return float(x)
 
-    def from_numpy(self, x: float) -> int:
-        x = int(round(x))
+    def from_numpy(self, x: np.ndarray) -> int:
+        x = int(x.round())
         return x
