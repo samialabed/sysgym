@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from sysgym.envs.rocksdb.schema.schema import RocksDBParamSchema
 from sysgym.params.boxes import DiscreteBox
+from sysgym.utils import converters
 
 
 @dataclass(init=False, frozen=True)
@@ -12,10 +13,9 @@ class RocksDB10Params(RocksDBParamSchema):
 
     # The default values are taken from rocksdb default, options.h
     max_background_compactions: DiscreteBox = DiscreteBox(
-        lower_bound=1, upper_bound=256, default=1
+        lower_bound=1, upper_bound=6, default=1
     )
 
-    # TODO(mixed optimization): Small discrete values should use optimize_discrete
     # max num concurrent bg compaction in parallel
     max_background_flushes: DiscreteBox = DiscreteBox(
         lower_bound=1, upper_bound=10, default=1
@@ -23,7 +23,9 @@ class RocksDB10Params(RocksDBParamSchema):
     # Flushing options
     # Ref https://github.com/facebook/rocksdb/wiki/RocksDB-Tuning-Guide#flushing-options
     write_buffer_size: DiscreteBox = DiscreteBox(
-        lower_bound=12097152, upper_bound=167772160, default=67108864
+        lower_bound=converters.short_size_to_base2("10mb"),
+        upper_bound=converters.short_size_to_base2("1gb"),
+        default=converters.short_size_to_base2("64mb"),
     )
     max_write_buffer_number: DiscreteBox = DiscreteBox(
         lower_bound=1, upper_bound=128, default=2
@@ -40,7 +42,9 @@ class RocksDB10Params(RocksDBParamSchema):
     )
 
     block_size: DiscreteBox = DiscreteBox(
-        lower_bound=32, upper_bound=500000, default=4096
+        lower_bound=converters.short_size_to_base2("1kb"),
+        upper_bound=converters.short_size_to_base2("128kb"),
+        default=converters.short_size_to_base2("4kb"),
     )
 
     # level optimization, compactions
@@ -49,15 +53,8 @@ class RocksDB10Params(RocksDBParamSchema):
     )
 
     level0_slowdown_writes_trigger: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=1024, default=0
+        lower_bound=-1, upper_bound=64, default=20
     )
     level0_stop_writes_trigger: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=1024, default=36
+        lower_bound=1, upper_bound=64, default=36
     )
-
-    # compression_type: CategoricalSpace = CategoricalBox(
-    #     name="compression_type",
-    #     categories=["Snappy", "ZSTD", "Zlib", "lz4"],
-    #     lower_bound=0,
-    #     upper_bound=3,
-    # )
