@@ -1,21 +1,19 @@
 from dataclasses import dataclass
 
-import sysgym.utils.converters as conv
 from sysgym.envs.rocksdb.schema.schema import RocksDBParamSchema
 from sysgym.params.boxes import BooleanBox, CategoricalBox, ContinuousBox, DiscreteBox
+from sysgym.utils import converters
 
 
 @dataclass(init=False, frozen=True)
 class RocksDB17Params(RocksDBParamSchema):
-    # Params: https://github.com/facebook/rocksdb/blob/main/include/rocksdb/options.h
-
     # Tuning flush and compactions:
     # Ref:
     # https://github.com/facebook/rocksdb/wiki/RocksDB-Tuning-Guide#tuning-flushes-and-compactions
 
     # The default values are taken from rocksdb default, options.h
     max_background_compactions: DiscreteBox = DiscreteBox(
-        lower_bound=1, upper_bound=256, default=1
+        lower_bound=1, upper_bound=6, default=1
     )
 
     # max num concurrent bg compaction in parallel
@@ -25,7 +23,9 @@ class RocksDB17Params(RocksDBParamSchema):
     # Flushing options
     # Ref https://github.com/facebook/rocksdb/wiki/RocksDB-Tuning-Guide#flushing-options
     write_buffer_size: DiscreteBox = DiscreteBox(
-        lower_bound=1, upper_bound=150000000, default=67108864
+        lower_bound=converters.short_size_to_bytes("10mb"),
+        upper_bound=converters.short_size_to_bytes("1gb"),
+        default=converters.short_size_to_bytes("64mb"),
     )
     max_write_buffer_number: DiscreteBox = DiscreteBox(
         lower_bound=1, upper_bound=128, default=2
@@ -37,35 +37,36 @@ class RocksDB17Params(RocksDBParamSchema):
     )
 
     # space params, tuning space
-    max_bytes_for_level_multiplier: ContinuousBox = ContinuousBox(
-        lower_bound=5, upper_bound=15, default=10
+    max_bytes_for_level_multiplier: DiscreteBox = DiscreteBox(
+        lower_bound=5, upper_bound=20, default=10
     )
 
     block_size: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=500000, default=4096
+        lower_bound=converters.short_size_to_bytes("1kb"),
+        upper_bound=converters.short_size_to_bytes("128kb"),
+        default=converters.short_size_to_bytes("4kb"),
     )
 
     # level optimization, compactions
     level0_file_num_compaction_trigger: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=256, default=4
+        lower_bound=1, upper_bound=64, default=4
     )
 
     level0_slowdown_writes_trigger: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=1024, default=0
+        lower_bound=-1, upper_bound=64, default=20
     )
     level0_stop_writes_trigger: DiscreteBox = DiscreteBox(
-        lower_bound=0, upper_bound=1024, default=36
+        lower_bound=1, upper_bound=64, default=36
     )
 
+    # V2 Extension from options.H!!!!!!!
     compression_type: CategoricalBox = CategoricalBox(
         categories=["Snappy", "ZSTD", "Zlib", "lz4"],
     )
 
-    # V2 Extension from options.H!!!!!!!
-
     compaction_readahead_size: DiscreteBox = DiscreteBox(
         lower_bound=0,
-        upper_bound=conv.short_size_to_bytes("4mb"),
+        upper_bound=converters.short_size_to_bytes("4mb"),
         default=0,
         # If non-zero, we perform bigger reads when doing compaction. If you're
         # running RocksDB on spinning disks, you should set this to at least 2MB.
@@ -76,8 +77,8 @@ class RocksDB17Params(RocksDBParamSchema):
 
     writable_file_max_buffer_size: DiscreteBox = DiscreteBox(
         lower_bound=1024,
-        upper_bound=conv.short_size_to_bytes("8mb"),
-        default=conv.short_size_to_bytes("1mb"),
+        upper_bound=converters.short_size_to_bytes("8mb"),
+        default=converters.short_size_to_bytes("1mb"),
         # This is the maximum buffer size that is used by WritableFileWriter. With
         # direct IO, we need to maintain an aligned buffer for writes. We allow
         # the buffer to grow until it's size hits the limit in buffered IO and
