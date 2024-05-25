@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Union
 
 import numpy as np
 from numpy.random import RandomState
@@ -38,6 +38,9 @@ class DiscreteBox(ParamBox[int]):
     def transform(self, x: int) -> float:
         return float(x)
 
-    def from_numpy(self, x: np.ndarray) -> int:
-        x = int(x.round())
+    def from_numpy(self, x: Union[np.ndarray, float]) -> int:
+        if isinstance(x, float):
+            x = int(round(x))
+        else:
+            x = int(x.round())
         return x
