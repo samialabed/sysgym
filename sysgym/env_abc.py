@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 from dataclasses_json import dataclass_json
 
@@ -36,7 +36,7 @@ class EnvConfig(ABC):
 class Environment(ABC):
     """Environment runner"""
 
-    def __init__(self, env_cfg: EnvConfig, artifacts_output_dir: Path):
+    def __init__(self, env_cfg: EnvConfig, artifacts_output_dir: Optional[Path] = None):
         """
 
 
