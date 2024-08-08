@@ -39,8 +39,9 @@ class DiscreteBox(ParamBox[int]):
         return float(x)
 
     def from_numpy(self, x: Union[np.ndarray, float]) -> int:
-        if isinstance(x, float):
-            x = int(round(x))
-        else:
-            x = int(x.round())
+        if not isinstance(x, int):
+            if isinstance(x, float):
+                x = int(round(x))
+            else:
+                x = int(x.round())
         return x
